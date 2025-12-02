@@ -1,0 +1,21 @@
+#root {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.page-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.page-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(18, 86, 212, 0.08), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(255, 145, 77, 0.08), transparent 40%);
+  z-index: -1;
+  pointer-events: none;
+}
