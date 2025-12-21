@@ -58,7 +58,7 @@ export function OwnerDashboard() {
   }
 
   if (currentUser.role !== 'owner') {
-    return <Navigate to="/dashboard/traveler" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   const myProperties = getPropertiesByOwner(currentUser.id);

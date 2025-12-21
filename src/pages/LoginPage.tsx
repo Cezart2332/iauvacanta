@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context';
+import logo from '../assets/logo.png';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -39,12 +40,10 @@ export function LoginPage() {
       return;
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const result = login(formData.email, formData.password);
+    const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      navigate('/dashboard/traveler');
+      navigate('/dashboard/owner');
     } else {
       setError(result.error || 'A apărut o eroare.');
     }
@@ -52,10 +51,20 @@ export function LoginPage() {
     setIsLoading(false);
   };
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`);
-    login('alex.popescu@email.com', 'password123');
-    navigate('/dashboard/traveler');
+  const handleSocialLogin = async (provider: string) => {
+    setIsLoading(true);
+    setError('');
+    try {
+      console.info(`Simulated ${provider} login`);
+      const result = await login('ion.georgescu@email.com', 'password123');
+      if (result.success) {
+        navigate('/dashboard/owner');
+      } else {
+        setError(result.error || 'Nu s-a putut realiza autentificarea.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,27 +76,24 @@ export function LoginPage() {
           </div>
           <div className="relative flex flex-1 flex-col justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-white/70">iau vacanță studio</p>
-              <h2 className="mt-6 text-3xl leading-tight text-white">Un cont. Toate județele și gazdele premium din România.</h2>
+              <p className="text-xs uppercase tracking-[0.4em] text-white/70">Program pentru gazde</p>
+              <h2 className="mt-6 text-3xl leading-tight text-white">Administrează-ți proprietățile și urmărește statisticile într-un singur loc.</h2>
               <p className="mt-4 text-white/80">
-                Accesează hărți interactive, shortlist-uri salvate și concierge digital pentru planuri spontane.
+                Accesează hărți interactive cu cererea reală, recomandări dinamice de preț și instrumente pentru gazde boutique.
               </p>
             </div>
             <ul className="space-y-4 text-sm text-white/80">
-              <li>• Itinerarii personalizate pentru fiecare rezervare.</li>
-              <li>• Chat direct cu gazdele și notificări smart.</li>
-              <li>• Perks pentru membri: late checkout, upgrade-uri.</li>
+              <li>• Vizibilitate în județele cu trafic ridicat.</li>
+              <li>• Chat direct cu echipa de onboarding și suport dedicat.</li>
+              <li>• Perks pentru gazde: mentori și workshop-uri trimestriale.</li>
             </ul>
           </div>
         </div>
 
         <div className="p-8 sm:p-12">
           <Link to="/" className="inline-flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--brand-primary)] text-white">
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12.5l9-9 9 9" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 10v11h4m6-11v11h-4" />
-              </svg>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-[0_10px_25px_rgba(15,23,42,0.1)]">
+              <img src={logo} alt="Logo iau vacanță" className="h-8 w-auto object-contain" loading="lazy" decoding="async" />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-[var(--brand-slate)]/70">platformă</p>
@@ -97,7 +103,7 @@ export function LoginPage() {
 
           <div className="mt-8 space-y-2">
             <h1 className="text-3xl text-[var(--brand-ink)]">Bine ai revenit!</h1>
-            <p className="text-[var(--brand-slate)]">Intră în cont și reia itinerary-urile salvate.</p>
+            <p className="text-[var(--brand-slate)]">Intră în contul tău de gazdă și continuă optimizarea proprietăților.</p>
           </div>
 
           <div className="mt-8 grid gap-3">
@@ -195,9 +201,9 @@ export function LoginPage() {
           </p>
 
           <div className="mt-6 rounded-2xl border border-white/80 bg-white/90 p-4 text-sm text-[var(--brand-slate)]">
-            <p className="font-semibold text-[var(--brand-ink)]">Acces demo</p>
-            <p>alex.popescu@email.com / password123</p>
+            <p className="font-semibold text-[var(--brand-ink)]">Acces demo gazde</p>
             <p>ion.georgescu@email.com / password123</p>
+            <p>elena.dumitrescu@email.com / password123</p>
           </div>
         </div>
       </div>

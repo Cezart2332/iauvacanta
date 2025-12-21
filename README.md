@@ -19,55 +19,52 @@ If you are developing a production application, we recommend updating the config
 export default defineConfig([
   globalIgnores(['dist']),
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+    # IauVacanță – Frontend
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+    React + TypeScript + Vite single-page app that now talks to the legacy Express/MySQL backend. Use this doc as a quick start for local development.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
+    ## Prerequisites
+
+    - Node.js 20+
+    - npm 10+
+    - Running MySQL instance loaded with `backend/iauvacan_iauvacanta.sql`
+    - Backend server from `backend/` in this repo (Express + mysql2)
+
+    ## Environment variables
+
+    Copy `.env.example` to `.env` and adjust if your backend runs on a different host/port:
+
+    ```
+    VITE_API_BASE_URL=http://localhost:4000/api
+    ```
+
+    The frontend uses this value for all API calls (auth, taxonomy, etc.). When deploying, point it to the public backend URL.
+
+    ## Install & run
+
+    ```bash
+    npm install
+    npm run dev
+    ```
+
+    The dev server expects the backend to be available at `VITE_API_BASE_URL`. Start the backend separately (`cd backend && npm install && npm run dev`).
+
+    ## Production build
+
+    ```bash
+    npm run build
+    npm run preview
+    ```
+
+    ## Legacy authentication flow
+
+    - The login form now calls `POST /api/auth/login` on the backend.
+    - Passwords are hashed with unsalted SHA-512 to match the historical `users` table inside `iauvacan_iauvacanta.sql`.
+    - If the backend is unreachable you can still use the built-in demo accounts listed on the login screen.
+
+    ## Troubleshooting
+
+    - **401 errors** – ensure the email/password pair exists in the imported `users` table.
+    - **Network errors** – verify `VITE_API_BASE_URL` matches the backend origin and that CORS is enabled (it is by default in `backend/src/app.ts`).
+    - **Database issues** – re-import the SQL dump and confirm the backend `.env` points to the right database.
     },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```

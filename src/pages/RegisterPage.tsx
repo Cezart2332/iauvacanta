@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context';
-import type { UserRole } from '../mock/users';
+import logo from '../assets/logo.png';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -10,14 +10,15 @@ export function RegisterPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
+    address: '',
     password: '',
     confirmPassword: '',
-    role: 'traveler' as UserRole,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -47,6 +48,18 @@ export function RegisterPage() {
       nextErrors.email = 'Email invalid.';
     }
 
+    if (!formData.phone.trim()) {
+      nextErrors.phone = 'Telefon obligatoriu.';
+    } else if (formData.phone.trim().length < 6) {
+      nextErrors.phone = 'Număr de telefon prea scurt.';
+    }
+
+    if (!formData.address.trim()) {
+      nextErrors.address = 'Adresă obligatorie.';
+    } else if (formData.address.trim().length < 5) {
+      nextErrors.address = 'Te rugăm să introduci o adresă completă.';
+    }
+
     if (!formData.password || formData.password.length < 6) {
       nextErrors.password = 'Parolă de minim 6 caractere.';
     }
@@ -66,19 +79,40 @@ export function RegisterPage() {
     setIsLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const result = register(formData.name, formData.email, formData.password, formData.role);
+    const result = await register(
+      formData.name,
+      formData.email,
+      formData.password,
+      formData.phone,
+      formData.address
+    );
     if (result.success) {
-      navigate(formData.role === 'owner' ? '/dashboard/owner' : '/dashboard/traveler');
+      navigate('/dashboard/owner');
     } else {
       setErrors({ general: result.error || 'A apărut o eroare.' });
     }
     setIsLoading(false);
   };
 
-  const handleSocialRegister = (provider: string) => {
-    console.log(`Register with ${provider}`);
-    register('Utilizator Nou', 'nou@email.com', 'password123', 'traveler');
-    navigate('/dashboard/traveler');
+  const handleSocialRegister = async (provider: string) => {
+    try {
+      setIsLoading(true);
+      console.info(`Simulated ${provider} register`);
+      const result = await register(
+        'Gazdă Nouă',
+        'gazda.noua@email.com',
+        'password123',
+        '+40 700 000 000',
+        'Str. Exemplu nr. 1, București'
+      );
+      if (result.success) {
+        navigate('/dashboard/owner');
+      } else if (result.error) {
+        setErrors({ general: result.error });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -90,27 +124,24 @@ export function RegisterPage() {
           </div>
           <div className="relative flex flex-1 flex-col justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-white/70">Pentru gazde & călători</p>
-              <h2 className="mt-6 text-3xl leading-tight text-white">Listează spații curated sau creează wishlist-uri pentru următoarea evadare.</h2>
+              <p className="text-xs uppercase tracking-[0.4em] text-white/70">Program pentru gazde</p>
+              <h2 className="mt-6 text-3xl leading-tight text-white">Listează spații boutique și accesează date reale din piață.</h2>
               <p className="mt-4 text-white/80">
-                Obții acces la rapoarte, recomandări de preț și comunitatea gazdelor iau vacanță.
+                Obții acces la rapoarte, recomandări de preț și comunitatea exclusivă de proprietari iau vacanță.
               </p>
             </div>
             <ul className="space-y-4 text-sm text-white/80">
-              <li>• Tool-uri pentru proprietari: ocupare inteligentă, contracte model.</li>
-              <li>• Pentru călători: concierge, alerte de preț și recenzii verificate.</li>
-              <li>• Evenimente și întâlniri trimestriale cu gazdele premium.</li>
+              <li>• Tool-uri pentru proprietari: ocupare inteligentă și modele de contracte.</li>
+              <li>• Analize comparative de piață și insight-uri din județul tău.</li>
+              <li>• Mentorat și întâlniri trimestriale cu gazdele premium.</li>
             </ul>
           </div>
         </div>
 
         <div className="p-8 sm:p-12">
           <Link to="/" className="inline-flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--brand-primary)] text-white">
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12.5l9-9 9 9" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 10v11h4m6-11v11h-4" />
-              </svg>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-[0_10px_25px_rgba(15,23,42,0.1)]">
+              <img src={logo} alt="Logo iau vacanță" className="h-8 w-auto object-contain" loading="lazy" decoding="async" />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-[var(--brand-slate)]/70">platformă</p>
@@ -120,7 +151,7 @@ export function RegisterPage() {
 
           <div className="mt-8 space-y-2">
             <h1 className="text-3xl text-[var(--brand-ink)]">Creează-ți contul</h1>
-            <p className="text-[var(--brand-slate)]">Acces rapid la proprietăți boutique și instrumente pentru gazde.</p>
+            <p className="text-[var(--brand-slate)]">Acces dedicat gazdelor pentru listare, statistici și management rapid.</p>
           </div>
 
           <div className="mt-8 grid gap-3">
@@ -196,6 +227,39 @@ export function RegisterPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
+                <label className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70" htmlFor="phone">
+                  Telefon
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className={`input-field mt-2 ${errors.phone ? 'border-red-300 focus:ring-red-400' : ''}`}
+                  placeholder="ex: +40 712 345 678"
+                />
+                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+              </div>
+
+              <div>
+                <label className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70" htmlFor="address">
+                  Adresă
+                </label>
+                <textarea
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className={`input-field mt-2 h-[52px] resize-none ${errors.address ? 'border-red-300 focus:ring-red-400' : ''}`}
+                  placeholder="Strada, număr, oraș"
+                />
+                {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
                 <label className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70" htmlFor="password">
                   Parolă
                 </label>
@@ -225,30 +289,6 @@ export function RegisterPage() {
                   placeholder="••••••••"
                 />
                 {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">Tip de cont</p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {[
-                  { role: 'traveler' as UserRole, label: 'Călător', description: 'Caut spații și îmi salvez liste.' },
-                  { role: 'owner' as UserRole, label: 'Gazdă', description: 'Listez și optimizez proprietăți.' },
-                ].map((option) => (
-                  <button
-                    key={option.role}
-                    type="button"
-                    onClick={() => setFormData((prev) => ({ ...prev, role: option.role }))}
-                    className={`rounded-3xl border-2 p-4 text-left transition ${
-                      formData.role === option.role
-                        ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5'
-                        : 'border-white/60 hover:border-white'
-                    }`}
-                  >
-                    <p className="text-lg text-[var(--brand-ink)]">{option.label}</p>
-                    <p className="text-sm text-[var(--brand-slate)]">{option.description}</p>
-                  </button>
-                ))}
               </div>
             </div>
 

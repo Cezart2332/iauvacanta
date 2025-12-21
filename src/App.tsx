@@ -7,7 +7,6 @@ import {
   PropertyDetailsPage,
   LoginPage,
   RegisterPage,
-  TravelerDashboard,
   OwnerDashboard,
 } from './pages';
 
@@ -31,7 +30,6 @@ function App() {
                 <Route path="/property/:id" element={<PropertyDetailsPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/dashboard/traveler" element={<TravelerDashboard />} />
                 <Route path="/dashboard/owner" element={<OwnerDashboard />} />
               </Routes>
               </main>

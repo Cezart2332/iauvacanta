@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { useAuth } from '../context';
 import { BrandButton, buttonClasses } from './ui/Button';
+import logo from '../assets/logo.png';
 
 type NavLink = {
   label: string;
@@ -39,7 +40,7 @@ export function Navbar() {
 
   const getDashboardLink = () => {
     if (!currentUser) return '/login';
-    return currentUser.role === 'owner' ? '/dashboard/owner' : '/dashboard/traveler';
+    return '/dashboard/owner';
   };
 
   const mobileNavVariants = {
@@ -122,13 +123,18 @@ export function Navbar() {
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative">
               <span className="absolute -inset-1 rounded-2xl bg-aurora opacity-30 blur-md group-hover:opacity-70 transition-opacity" />
-              <div className="relative w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-[0_10px_25px_rgba(15,23,42,0.1)]">
-                <svg className="w-6 h-6 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M3 12.5l9-9 9 9M5.5 10V19a1 1 0 001 1h4.25m9.25-10v9.5a1 1 0 01-1 1H15" />
-                </svg>
+              <div className="relative w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-[0_10px_25px_rgba(15,23,42,0.1)]">
+                <img
+                  src={logo}
+                  alt="Logo iau vacanță"
+                  className="h-8 w-auto object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             </div>
             <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-[var(--brand-slate)]/70">studio</p>
               <p className="font-semibold text-base text-[var(--brand-ink)] leading-tight">iau vacanță</p>
             </div>
             <span className="hidden sm:inline-flex text-[10px] uppercase tracking-[0.35em] text-white bg-[var(--brand-primary)]/80 px-2 py-1 rounded-full">
@@ -200,7 +206,10 @@ export function Navbar() {
               </div>
             ) : (
               <>
-                <Link to="/login" className={buttonClasses('ghost', 'text-sm px-4 py-2')}>
+                <Link
+                  to="/login"
+                  className="inline-flex items-center rounded-2xl border border-[var(--brand-primary)]/40 bg-white/90 px-4 py-2 text-sm font-semibold text-[var(--brand-primary)] shadow-[0_10px_25px_rgba(15,23,42,0.08)] transition hover:border-[var(--brand-primary)] hover:bg-white"
+                >
                   Autentificare
                 </Link>
                 <Link to="/register" className={buttonClasses('primary', 'text-sm')}>
@@ -279,7 +288,7 @@ export function Navbar() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <Link to="/login" className="block rounded-2xl border border-white/60 bg-white/40 px-4 py-3 font-semibold text-[var(--brand-primary)]">
+                  <Link to="/login" className="block rounded-2xl border border-[var(--brand-primary)]/40 bg-white/90 px-4 py-3 font-semibold text-[var(--brand-primary)]">
                     Autentificare
                   </Link>
                   <Link to="/register" className="block text-center rounded-2xl bg-aurora text-white px-4 py-3 font-semibold shadow-[0_18px_35px_rgba(15,23,42,0.15)]">

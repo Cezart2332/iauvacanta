@@ -48,6 +48,7 @@ export function PropertyDetailsPage() {
   }
 
   const isFav = isFavorite(property.id);
+  const hasPriceRange = property.priceMin > 0 || property.priceMax > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -220,12 +221,18 @@ export function PropertyDetailsPage() {
             <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
               <div className="mb-6">
                 <span className="text-sm text-gray-500">Preț per noapte</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-gray-900">{property.priceMin}</span>
-                  <span className="text-lg text-gray-500">-</span>
-                  <span className="text-3xl font-bold text-gray-900">{property.priceMax}</span>
-                  <span className="text-lg text-gray-500">RON</span>
-                </div>
+                {hasPriceRange ? (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold text-gray-900">{property.priceMin}</span>
+                    <span className="text-lg text-gray-500">-</span>
+                    <span className="text-3xl font-bold text-gray-900">{property.priceMax}</span>
+                    <span className="text-lg text-gray-500">RON</span>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
+                    Tarif disponibil la cerere
+                  </p>
+                )}
               </div>
 
               <button

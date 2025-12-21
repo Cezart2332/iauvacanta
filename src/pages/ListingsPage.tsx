@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PropertyCard, FilterBar, type FilterState, type SortOption } from '../components';
 import { useData } from '../context';
@@ -7,10 +7,18 @@ const ITEMS_PER_PAGE = 9;
 
 export function ListingsPage() {
   const { judetSlug } = useParams<{ judetSlug: string }>();
-  const { getPropertiesByCounty, getCountyBySlug, sortProperties } = useData();
+  const {
+    getPropertiesByCounty,
+    getCountyBySlug,
+    sortProperties,
+    isLoading,
+    error,
+    refreshProperties,
+  } = useData();
 
   const county = getCountyBySlug(judetSlug || '');
   const allProperties = getPropertiesByCounty(judetSlug || '');
+  const countyHasListings = allProperties.length > 0;
 
   const [filters, setFilters] = useState<FilterState>({
     type: '',
@@ -67,6 +75,10 @@ export function ListingsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleRetryFetch = useCallback(() => {
+    void refreshProperties();
+  }, [refreshProperties]);
+
   if (!county) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--brand-sand)] px-4 py-24">
@@ -81,14 +93,37 @@ export function ListingsPage() {
     );
   }
 
-  const averageRating = allProperties.length
-    ? (allProperties.reduce((acc, p) => acc + p.rating, 0) / allProperties.length).toFixed(1)
+  const ratedProperties = allProperties.filter((p) => p.rating > 0);
+  const averageRating = ratedProperties.length
+    ? (ratedProperties.reduce((acc, p) => acc + p.rating, 0) / ratedProperties.length).toFixed(1)
     : '0.0';
 
   const heroDescription = `Descoperă ${county.name} prin ${allProperties.length || '0'} spații boutique din ${county.region}, evaluate în medie la ${averageRating}/5.`;
 
   return (
-    <div className="min-h-screen bg-[var(--brand-sand)]">
+    <div className="min-h-screen bg-[var(--brand-sand)] relative">
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <span className="sr-only">Încărcăm proprietățile reale...</span>
+          <span
+            aria-hidden
+            className="inline-block h-12 w-12 animate-spin rounded-full border-2 border-[var(--brand-primary)] border-t-transparent"
+          />
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 px-4 py-3 text-center text-sm text-red-900">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={handleRetryFetch}
+            className="ml-3 inline-flex text-xs font-semibold uppercase tracking-[0.3em] text-red-700"
+          >
+            Reîncearcă
+          </button>
+        </div>
+      )}
       <section className="relative overflow-hidden pt-28 pb-16">
         <div className="absolute inset-0 bg-gradient-to-br from-white via-[var(--brand-sand)] to-white" />
         <div className="absolute inset-0 pattern-wave opacity-40" />
@@ -162,11 +197,13 @@ export function ListingsPage() {
 
           <div className="mt-8 flex flex-col gap-2 text-sm text-[var(--brand-slate)] md:flex-row md:items-center md:justify-between">
             <p>
-              {filteredProperties.length === 0
-                ? 'Momentan nu avem proprietăți care să corespundă filtrelor tale.'
-                : filteredProperties.length === 1
-                  ? 'O singură proprietate se potrivește filtrării tale.'
-                  : `${filteredProperties.length} proprietăți curatoriate pentru criteriile selectate.`}
+              {!countyHasListings
+                ? `Încă nu avem locații publicate în ${county.name}. Revenim curând cu gazde verificate.`
+                : filteredProperties.length === 0
+                  ? 'Momentan nu avem proprietăți care să corespundă filtrelor tale.'
+                  : filteredProperties.length === 1
+                    ? 'O singură proprietate se potrivește filtrării tale.'
+                    : `${filteredProperties.length} proprietăți curatoriate pentru criteriile selectate.`}
             </p>
             {filteredProperties.length > 0 && (
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">
@@ -176,23 +213,49 @@ export function ListingsPage() {
           </div>
 
           {filteredProperties.length === 0 ? (
-            <div className="mt-10 rounded-[40px] border border-dashed border-white/60 bg-white/70 p-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
-                <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M12 8v8m4-4H8" />
-                </svg>
+            countyHasListings ? (
+              <div className="mt-10 rounded-[40px] border border-dashed border-white/60 bg-white/70 p-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
+                  <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M12 8v8m4-4H8" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-2xl text-[var(--brand-ink)]">Încă nu avem potriviri.</h3>
+                <p className="mt-2 text-[var(--brand-slate)]">
+                  Ajustează filtrele sau resetează-le pentru a vedea întreaga colecție.
+                </p>
+                <button
+                  onClick={() => handleFilterChange({ type: '', priceMin: 0, priceMax: 5000, rating: 0, facilities: [] })}
+                  className="btn-aurora mt-6 text-xs uppercase tracking-[0.3em]"
+                >
+                  Șterge filtrele
+                </button>
               </div>
-              <h3 className="mt-4 text-2xl text-[var(--brand-ink)]">Încă nu avem potriviri.</h3>
-              <p className="mt-2 text-[var(--brand-slate)]">
-                Ajustează filtrele sau resetează-le pentru a vedea întreaga colecție.
-              </p>
-              <button
-                onClick={() => handleFilterChange({ type: '', priceMin: 0, priceMax: 5000, rating: 0, facilities: [] })}
-                className="btn-aurora mt-6 text-xs uppercase tracking-[0.3em]"
-              >
-                Șterge filtrele
-              </button>
-            </div>
+            ) : (
+              <div className="mt-10 rounded-[40px] border border-dashed border-white/60 bg-white/70 p-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
+                  <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <h3 className="mt-4 text-2xl text-[var(--brand-ink)]">Lucrăm la colecția din {county.name}.</h3>
+                <p className="mt-2 text-[var(--brand-slate)]">
+                  Migrația datelor istorice încă este în derulare pentru acest județ. Îți poți planifica vacanța într-o altă zonă între timp.
+                </p>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                  <Link to="/" className="btn-aurora text-xs uppercase tracking-[0.3em]">
+                    Vezi toate județele
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleRetryFetch}
+                    className="btn-outline-glow text-xs uppercase tracking-[0.3em]"
+                  >
+                    Reîncarcă datele
+                  </button>
+                </div>
+              </div>
+            )
           ) : (
             <>
               <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">

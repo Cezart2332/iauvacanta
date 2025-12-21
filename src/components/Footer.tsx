@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const socialLinks = [
   { label: 'Facebook', href: '#', icon: (
@@ -35,10 +36,8 @@ export function Footer() {
         <div className="grid gap-12 lg:grid-cols-4">
           <div className="space-y-5">
             <Link to="/" className="inline-flex items-center gap-3 rounded-[24px] border border-white/20 bg-white/5 px-4 py-3">
-              <div className="h-11 w-11 rounded-2xl bg-white text-[var(--brand-primary)] flex items-center justify-center">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12.5l9-9 9 9M5.5 10V19a1 1 0 001 1h4.25m9.25-10v9.5a1 1 0 01-1 1H15" />
-                </svg>
+              <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center">
+                <img src={logo} alt="Logo iau vacanță" className="h-9 w-auto object-contain" loading="lazy" decoding="async" />
               </div>
               <div>
                 <p className="text-sm uppercase tracking-[0.3em] text-white/70">studio</p>

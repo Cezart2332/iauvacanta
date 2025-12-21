@@ -1,4 +1,4 @@
-export type UserRole = 'traveler' | 'owner';
+export type UserRole = 'owner';
 
 export interface User {
   id: string;
@@ -8,33 +8,12 @@ export interface User {
   role: UserRole;
   avatarUrl: string;
   phone?: string;
+  address?: string;
   createdAt: string;
   favorites: string[]; // Property IDs
 }
 
 export const users: User[] = [
-  {
-    id: 'traveler-1',
-    name: 'Alexandru Popescu',
-    email: 'alex.popescu@email.com',
-    password: 'password123',
-    role: 'traveler',
-    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-    phone: '+40 722 111 222',
-    createdAt: '2024-01-15',
-    favorites: ['prop-1', 'prop-4', 'prop-9', 'prop-19'],
-  },
-  {
-    id: 'traveler-2',
-    name: 'Maria Ionescu',
-    email: 'maria.ionescu@email.com',
-    password: 'password123',
-    role: 'traveler',
-    avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
-    phone: '+40 733 222 333',
-    createdAt: '2024-03-20',
-    favorites: ['prop-2', 'prop-7', 'prop-13'],
-  },
   {
     id: 'owner-1',
     name: 'Ion Georgescu',
@@ -78,8 +57,4 @@ export const validateLogin = (email: string, password: string): User | null => {
 
 export const getOwners = (): User[] => {
   return users.filter(u => u.role === 'owner');
-};
-
-export const getTravelers = (): User[] => {
-  return users.filter(u => u.role === 'traveler');
 };

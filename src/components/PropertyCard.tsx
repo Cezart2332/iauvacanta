@@ -20,6 +20,7 @@ export function PropertyCard({ property, showFavorite = true }: PropertyCardProp
   };
 
   const displayFacilities = property.facilities.slice(0, 3);
+  const hasPrice = property.priceMin > 0;
 
   return (
     <Link
@@ -105,13 +106,19 @@ export function PropertyCard({ property, showFavorite = true }: PropertyCardProp
         </div>
 
         <div className="flex items-end justify-between border-t border-white/60 pt-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/60">de la</p>
-            <p className="text-2xl font-semibold text-[var(--brand-ink)]">
-              {property.priceMin} RON
-              <span className="text-sm font-normal text-[var(--brand-slate)]"> / noapte</span>
+          {hasPrice ? (
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/60">de la</p>
+              <p className="text-2xl font-semibold text-[var(--brand-ink)]">
+                {property.priceMin} RON
+                <span className="text-sm font-normal text-[var(--brand-slate)]"> / noapte</span>
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--brand-slate)]/70">
+              Tarif la cerere
             </p>
-          </div>
+          )}
           <span className="text-sm font-semibold text-[var(--brand-primary)] group-hover:translate-x-1 transition-transform">
             Vezi detalii →
           </span>

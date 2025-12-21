@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { properties as initialProperties, type Property, type PropertyType, type Facility } from '../mock/properties';
 import { counties, type County } from '../mock/counties';
+import { fetchVisiblePensiuni, type LegacyPensiune } from '../services/pensiuni';
 
 interface FilterOptions {
   type?: PropertyType | '';
@@ -15,6 +16,9 @@ type SortOption = 'price-asc' | 'price-desc' | 'rating' | 'name';
 interface DataContextType {
   properties: Property[];
   counties: County[];
+  isLoading: boolean;
+  error: string | null;
+  refreshProperties: () => Promise<void>;
   getPropertyById: (id: string) => Property | undefined;
   getPropertiesByCounty: (judetSlug: string) => Property[];
   getPropertiesByOwner: (ownerId: string) => Property[];
@@ -29,8 +33,132 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=900&auto=format&fit=crop';
+const FALLBACK_DESCRIPTION = 'Această proprietate face parte din arhiva iauvacanța și în curând va avea o prezentare completă.';
+
+const LEGACY_FACILITY_MAP: Record<string, Facility> = {
+  '111': 'saună',
+  '112': 'fitness',
+  '113': 'spa',
+  '115': 'bar',
+  '117': 'restaurant',
+  '118': 'aer-conditionat',
+  '120': 'jacuzzi',
+  '121': 'terasă',
+  '126': 'room-service',
+  '130': 'terasă',
+  '131': 'grătar',
+};
+
+const buildReviewCount = (rating: number | null): number => {
+  if (!rating || rating <= 0) {
+    return 0;
+  }
+  return Math.max(8, Math.round(rating * 18));
+};
+
+const mapLegacyFacilities = (facilityIds: string[]): Facility[] => {
+  if (!Array.isArray(facilityIds) || facilityIds.length === 0) {
+    return [];
+  }
+
+  const deduped = new Set<Facility>();
+  facilityIds.forEach((id) => {
+    const mapped = LEGACY_FACILITY_MAP[id];
+    if (mapped) {
+      deduped.add(mapped);
+    }
+  });
+
+  return Array.from(deduped.values());
+};
+
+const formatErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'Nu am putut încărca proprietățile. Încercați din nou.';
+};
+
+const mapLegacyPensiuneToProperty = (legacy: LegacyPensiune): Property => {
+  const countySlug = legacy.location.countySlug ?? 'necunoscut';
+  const city = legacy.location.localityName ?? legacy.location.countyName ?? 'România';
+  const priceMin = legacy.price.min ?? legacy.price.max ?? 0;
+  const priceMax = legacy.price.max ?? legacy.price.min ?? priceMin;
+  const images = legacy.photos.length > 0 ? legacy.photos : [FALLBACK_IMAGE];
+
+  return {
+    id: `legacy-${legacy.id}`,
+    name: legacy.name,
+    type: 'pensiune',
+    judetSlug: countySlug,
+    city,
+    address: legacy.address ?? city,
+    priceMin,
+    priceMax,
+    rating: legacy.rating ?? 0,
+    reviewCount: buildReviewCount(legacy.rating),
+    facilities: mapLegacyFacilities(legacy.facilityIds),
+    mainImageUrl: images[0] ?? FALLBACK_IMAGE,
+    images,
+    description: legacy.description ?? FALLBACK_DESCRIPTION,
+    tagline: legacy.type.label ?? city,
+    phone: legacy.phone ?? '',
+    email: legacy.email ?? '',
+    website: '',
+    ownerId: legacy.ownerName ?? `legacy-owner-${legacy.id}`,
+  };
+};
+
 export function DataProvider({ children }: { children: ReactNode }) {
   const [propertiesState, setProperties] = useState<Property[]>(initialProperties);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+
+  const hydrateFromApi = useCallback(async (): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetchVisiblePensiuni({ limit: 150 });
+      if (!isMountedRef.current) {
+        return;
+      }
+
+      if (!response || !Array.isArray(response.data)) {
+        throw new Error('Datele pensiunilor nu au putut fi interpretate.');
+      }
+
+      const normalized = response.data.map(mapLegacyPensiuneToProperty);
+      setProperties(normalized);
+    } catch (err) {
+      if (!isMountedRef.current) {
+        return;
+      }
+      console.error('Failed to load pensiuni', err);
+      setError(formatErrorMessage(err));
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    hydrateFromApi();
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [hydrateFromApi]);
+
+  const refreshProperties = useCallback(async () => {
+    await hydrateFromApi();
+  }, [hydrateFromApi]);
 
   const getPropertyById = useCallback((id: string): Property | undefined => {
     return propertiesState.find(p => p.id === id);
@@ -125,6 +253,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     <DataContext.Provider value={{
       properties: propertiesState,
       counties,
+      isLoading,
+      error,
+      refreshProperties,
       getPropertyById,
       getPropertiesByCounty,
       getPropertiesByOwner,

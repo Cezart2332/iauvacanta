@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MapRomania, PropertyCard } from '../components';
 import { useData } from '../context';
@@ -82,11 +82,84 @@ const statHighlights = [
 ];
 
 export function HomePage() {
-  const { properties } = useData();
+  const { properties, counties, isLoading, error, refreshProperties } = useData();
   const location = useLocation();
   const [mapHighlighted, setMapHighlighted] = useState(false);
   const mapSectionRef = useRef<HTMLElement | null>(null);
   const highlightTimerRef = useRef<number | null>(null);
+  const [activeCountySlug, setActiveCountySlug] = useState<string | null>(null);
+
+  const countiesWithInventory = useMemo(() => {
+    const result = new Set<string>();
+    properties.forEach((property) => {
+      if (property.judetSlug) {
+        result.add(property.judetSlug);
+      }
+    });
+    return result;
+  }, [properties]);
+
+  const countiesBySlug = useMemo(() => {
+    return counties.reduce<Record<string, typeof counties[number]>>((acc, county) => {
+      acc[county.slug] = county;
+      return acc;
+    }, {});
+  }, [counties]);
+
+  const countyDestinations = useMemo(() => {
+    type Destination = {
+      slug: string;
+      name: string;
+      region: string;
+      description: string;
+      propertyCount: number;
+      image: string;
+    };
+
+    const grouped = new Map<string, Destination>();
+
+    properties.forEach((property) => {
+      if (!property.judetSlug) {
+        return;
+      }
+      const slug = property.judetSlug;
+      const county = countiesBySlug[slug];
+      const coverImage = property.images[0] || property.mainImageUrl;
+      const existing = grouped.get(slug);
+      if (existing) {
+        existing.propertyCount += 1;
+        if (!existing.image && coverImage) {
+          existing.image = coverImage;
+        }
+      } else {
+        grouped.set(slug, {
+          slug,
+          name: county?.name ?? slug,
+          region: county?.region ?? 'România',
+          description: `${property.city}${county ? ` • ${county.region}` : ''}`,
+          propertyCount: 1,
+          image: coverImage,
+        });
+      }
+    });
+
+    return Array.from(grouped.values()).sort((a, b) => b.propertyCount - a.propertyCount);
+  }, [properties, countiesBySlug]);
+
+  const destinations = useMemo(() => {
+    if (countyDestinations.length > 0) {
+      return countyDestinations;
+    }
+
+    return popularDestinations.map((dest) => ({
+      slug: dest.slug,
+      name: dest.name,
+      region: dest.description,
+      description: dest.description,
+      propertyCount: dest.propertyCount,
+      image: dest.image,
+    }));
+  }, [countyDestinations]);
 
   const scrollToMapSection = useCallback(() => {
     const element = mapSectionRef.current;
@@ -115,6 +188,22 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
+    if (destinations.length === 0) {
+      setActiveCountySlug(null);
+      return;
+    }
+
+    if (!activeCountySlug) {
+      return;
+    }
+
+    const activeExists = destinations.some((dest) => dest.slug === activeCountySlug);
+    if (!activeExists) {
+      setActiveCountySlug(null);
+    }
+  }, [destinations, activeCountySlug]);
+
+  useEffect(() => {
     const handleMapFocus = () => {
       scrollToMapSection();
       triggerMapHighlight();
@@ -135,10 +224,55 @@ export function HomePage() {
   const featuredProperties = properties.filter((p) => p.rating >= 4.5).slice(0, 4);
   const heroHighlight = featuredProperties[0];
   const heroHighlightImage = heroHighlight?.images?.[0] ?? 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=800';
+  const heroHighlightDescription = heroHighlight?.description ?? '';
+  const heroDescriptionIsTruncated = heroHighlightDescription.length > 180;
+  const heroDescriptionSnippet = heroDescriptionIsTruncated
+    ? `${heroHighlightDescription.slice(0, 180).trim()}…`
+    : heroHighlightDescription;
   const curatedCollection = featuredProperties.slice(1, 3);
+  const activeDestination = destinations.find((dest) => dest.slug === activeCountySlug);
+
+
+  const handleSidebarSelect = useCallback((slug: string) => {
+    setActiveCountySlug(slug);
+  }, []);
+
+  const handleMapCountySelect = useCallback((slug: string) => {
+    setActiveCountySlug(slug);
+  }, []);
+
+  const handleMapResetFocus = useCallback(() => {
+    setActiveCountySlug(null);
+  }, []);
+
+  const handleRetryFetch = useCallback(() => {
+    void refreshProperties();
+  }, [refreshProperties]);
 
   return (
     <div className="relative">
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <span className="sr-only">Încărcăm colecția din arhiva iauvacanța...</span>
+          <span
+            aria-hidden
+            className="inline-block h-12 w-12 animate-spin rounded-full border-2 border-[var(--brand-primary)] border-t-transparent"
+          />
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 px-4 py-3 text-center text-sm text-red-900">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={handleRetryFetch}
+            className="ml-3 inline-flex text-xs font-semibold uppercase tracking-[0.3em] text-red-700"
+          >
+            Reîncearcă
+          </button>
+        </div>
+      )}
       {/* Hero */}
       <section className="relative overflow-hidden pt-28 pb-16 md:pt-32 md:pb-24">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-sand)] via-white to-[#f5f2ec]" />
@@ -197,8 +331,16 @@ export function HomePage() {
                       <p className="text-sm text-[var(--brand-slate)]">{heroHighlight.city}, {heroHighlight.judetSlug}</p>
                     )}
                     <p className="mt-3 text-sm text-[var(--brand-slate)]">
-                      {heroHighlight?.description}
+                      {heroDescriptionSnippet}
                     </p>
+                    {heroHighlight && heroDescriptionIsTruncated && (
+                      <Link
+                        to={`/property/${heroHighlight.id}`}
+                        className="mt-3 inline-flex text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-primary)]"
+                      >
+                        Află mai multe detalii
+                      </Link>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -215,7 +357,9 @@ export function HomePage() {
                   <h4 className="mt-2 text-lg text-[var(--brand-ink)]">{property.name}</h4>
                   <p className="text-sm text-[var(--brand-slate)]">{property.city}</p>
                   <div className="mt-4 flex items-center justify-between text-sm text-[var(--brand-slate)]">
-                    <span>{property.priceMin}€ / noapte</span>
+                    <span>
+                      {property.priceMin > 0 ? `${property.priceMin}€ / noapte` : 'Tarif la cerere'}
+                    </span>
                     <span className="inline-flex items-center gap-1">
                       <svg className="h-4 w-4 text-[var(--brand-primary)]" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -264,33 +408,62 @@ export function HomePage() {
               <div className="mb-6 flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.4em] text-[var(--brand-slate)]/70">Explorează harta</p>
+                  {activeDestination && (
+                    <p className="mt-1 text-sm text-[var(--brand-slate)]">
+                      {activeDestination.name} • {activeDestination.propertyCount}+ cazări curate
+                    </p>
+                  )}
                 </div>
-                <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-[var(--brand-slate)]">42 județe</span>
+                <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-[var(--brand-slate)]">
+                  {destinations.length || counties.length} județe
+                </span>
               </div>
-              <MapRomania />
+              <MapRomania
+                activeCounty={activeCountySlug ?? undefined}
+                onCountySelect={handleMapCountySelect}
+                onResetFocus={handleMapResetFocus}
+                canNavigateToCounty={(slug) => countiesWithInventory.has(slug)}
+              />
             </div>
 
             <div className="space-y-6">
               <div className="rounded-[32px] border border-white/50 bg-white/80 p-6 shadow-[0_18px_35px_rgba(15,23,42,0.08)]">
                 <p className="text-xs uppercase tracking-[0.4em] text-[var(--brand-slate)]/70">Destinații populare</p>
                 <div className="mt-4 space-y-4">
-                  {popularDestinations.map((dest) => (
-                    <Link
-                      key={dest.slug}
-                      to={`/locations/${dest.slug}`}
-                      className="flex items-center gap-4 rounded-2xl border border-transparent p-4 transition hover:border-[var(--brand-primary)]/20 hover:bg-white"
-                    >
-                      <img src={dest.image} alt={dest.name} className="h-16 w-16 rounded-2xl object-cover" />
-                      <div className="flex-1">
-                        <p className="text-sm uppercase tracking-[0.3em] text-[var(--brand-slate)]/60">{dest.description}</p>
-                        <h4 className="text-lg text-[var(--brand-ink)]">{dest.name}</h4>
-                        <p className="text-sm text-[var(--brand-slate)]">{dest.propertyCount}+ cazări</p>
+                  {destinations.slice(0, 5).map((dest) => {
+                    const isActive = dest.slug === activeCountySlug;
+                    return (
+                      <div
+                        key={dest.slug}
+                        className={`flex items-center gap-4 rounded-2xl border p-4 transition ${
+                          isActive
+                            ? 'border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/5 shadow-[0_15px_30px_rgba(18,86,212,0.12)]'
+                            : 'border-transparent hover:border-[var(--brand-primary)]/15 hover:bg-white'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleSidebarSelect(dest.slug)}
+                          className="flex flex-1 items-center gap-4 text-left"
+                        >
+                          <img src={dest.image} alt={dest.name} className="h-16 w-16 rounded-2xl object-cover" />
+                          <div className="flex-1">
+                            <p className="text-sm uppercase tracking-[0.3em] text-[var(--brand-slate)]/60">{dest.region}</p>
+                            <h4 className="text-lg text-[var(--brand-ink)]">{dest.name}</h4>
+                            <p className="text-sm text-[var(--brand-slate)]">{dest.propertyCount}+ cazări</p>
+                          </div>
+                        </button>
+                        <Link
+                          to={`/locations/${dest.slug}`}
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--brand-slate)]/20 text-[var(--brand-slate)] hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
+                        >
+                          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
                       </div>
-                      <svg className="h-5 w-5 text-[var(--brand-slate)]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
