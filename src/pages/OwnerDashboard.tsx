@@ -1,8 +1,27 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { FiEye, FiHome, FiMessageCircle, FiStar } from 'react-icons/fi';
+import { AnimatePresence, motion } from 'motion/react';
 import { useAuth, useData } from '../context';
 import { counties } from '../mock/counties';
 import { propertyTypeLabels, facilityLabels, type PropertyType, type Facility, type Property } from '../mock/properties';
+
+const containerVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      staggerChildren: 0.06
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+};
 
 const allFacilities: Facility[] = [
   'wifi', 'parcare', 'mic-dejun', 'piscină', 'restaurant', 
@@ -57,6 +76,10 @@ export function OwnerDashboard() {
     return <Navigate to="/login" replace />;
   }
 
+  if (currentUser.role === 'admin') {
+    return <Navigate to="/dashboard/admin" replace />;
+  }
+
   if (currentUser.role !== 'owner') {
     return <Navigate to="/login" replace />;
   }
@@ -80,19 +103,33 @@ export function OwnerDashboard() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitError, setSubmitError] = useState<string>('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
     
     if (editingProperty) {
-      updateProperty(editingProperty.id, formData);
+      try {
+        await updateProperty(editingProperty.id, formData);
+      } catch {
+        setSubmitError('Nu am putut actualiza proprietatea. Verifică autentificarea și încearcă din nou.');
+        return;
+      }
     } else {
-      addProperty({
-        ...formData,
-        images: [formData.mainImageUrl],
-        rating: 4.0,
-        reviewCount: 0,
-        ownerId: currentUser.id,
-      });
+      try {
+        await addProperty({
+          ...formData,
+          images: [formData.mainImageUrl],
+          rating: 4.0,
+          reviewCount: 0,
+          ownerId: currentUser.id,
+          isApproved: false
+        });
+      } catch {
+        setSubmitError('Nu am putut crea proprietatea. Verifică autentificarea și încearcă din nou.');
+        return;
+      }
     }
 
     setFormData(emptyForm);
@@ -121,9 +158,13 @@ export function OwnerDashboard() {
     setShowForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    deleteProperty(id);
-    setDeleteConfirm(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProperty(id);
+      setDeleteConfirm(null);
+    } catch {
+      setSubmitError('Nu am putut șterge proprietatea. Încearcă din nou.');
+    }
   };
 
   const handleCancel = () => {
@@ -133,10 +174,15 @@ export function OwnerDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <motion.div
+      className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.9)_0%,_rgba(236,245,255,0.85)_35%,_rgba(225,236,252,0.75)_100%)] pt-20"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               Proprietățile mele
@@ -145,43 +191,71 @@ export function OwnerDashboard() {
               Gestionează-ți proprietățile și vezi statisticile
             </p>
           </div>
-          <button
+          <motion.button
             onClick={() => setShowForm(true)}
             className="btn-accent flex items-center gap-2"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
             Adaugă proprietate
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Proprietăți', value: myProperties.length, icon: '🏠', color: 'blue' },
-            { label: 'Rating mediu', value: myProperties.length > 0 ? (myProperties.reduce((acc, p) => acc + p.rating, 0) / myProperties.length).toFixed(1) : '0', icon: '⭐', color: 'amber' },
-            { label: 'Total recenzii', value: myProperties.reduce((acc, p) => acc + p.reviewCount, 0), icon: '💬', color: 'green' },
-            { label: 'Vizualizări', value: '1.2K', icon: '👁️', color: 'purple' },
+            { label: 'Proprietăți', value: myProperties.length, Icon: FiHome },
+            { label: 'Rating mediu', value: myProperties.length > 0 ? (myProperties.reduce((acc, p) => acc + p.rating, 0) / myProperties.length).toFixed(1) : '0', Icon: FiStar },
+            { label: 'Total recenzii', value: myProperties.reduce((acc, p) => acc + p.reviewCount, 0), Icon: FiMessageCircle },
+            { label: 'Vizualizări', value: '1.2K', Icon: FiEye },
           ].map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg p-6">
+            <motion.div
+              key={index}
+              className="rounded-2xl border border-white/70 bg-white/55 backdrop-blur-xl shadow-[0_18px_45px_rgba(148,163,184,0.28),inset_0_1px_0_rgba(255,255,255,0.85)] p-6"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 + index * 0.06, duration: 0.28 }}
+            >
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{stat.icon}</span>
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/60 bg-white/70 text-[var(--brand-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                  <stat.Icon className="h-5 w-5" />
+                </span>
                 <div>
                   <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
                   <div className="text-sm text-gray-500">{stat.label}</div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Property Form Modal */}
-        {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCancel} />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center z-10">
+        <AnimatePresence>
+          {showForm && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={handleCancel}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+              <motion.div
+                className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/70 bg-white/75 backdrop-blur-2xl shadow-[0_35px_80px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.85)]"
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.98 }}
+                transition={{ duration: 0.25 }}
+              >
+              <div className="sticky top-0 border-b border-white/60 bg-white/70 backdrop-blur-xl px-6 py-4 flex justify-between items-center z-10">
                 <h2 className="text-xl font-bold text-gray-900">
                   {editingProperty ? 'Editează proprietatea' : 'Adaugă proprietate nouă'}
                 </h2>
@@ -193,6 +267,11 @@ export function OwnerDashboard() {
               </div>
 
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                {submitError && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {submitError}
+                  </div>
+                )}
                 {/* Basic info */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -414,13 +493,14 @@ export function OwnerDashboard() {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Properties list */}
         {myProperties.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+          <motion.div variants={itemVariants} className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -440,11 +520,17 @@ export function OwnerDashboard() {
                 Adaugă prima proprietate
               </span>
             </button>
-          </div>
+          </motion.div>
         ) : (
-          <div className="space-y-4">
-            {myProperties.map((property) => (
-              <div key={property.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <motion.div variants={itemVariants} className="space-y-4">
+            {myProperties.map((property, index) => (
+              <motion.div
+                key={property.id}
+                className="bg-white rounded-xl shadow-lg overflow-hidden"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.06 * index, duration: 0.25 }}
+              >
                 <div className="flex flex-col md:flex-row">
                   {/* Image */}
                   <div className="md:w-64 h-48 md:h-auto flex-shrink-0">
@@ -527,30 +613,38 @@ export function OwnerDashboard() {
                 </div>
 
                 {/* Delete confirmation */}
-                {deleteConfirm === property.id && (
-                  <div className="bg-red-50 border-t border-red-100 px-6 py-4 flex items-center justify-between">
-                    <p className="text-red-700">Ești sigur că vrei să ștergi această proprietate?</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setDeleteConfirm(null)}
-                        className="px-4 py-2 text-sm text-gray-600 hover:bg-white rounded-lg transition-colors"
-                      >
-                        Anulează
-                      </button>
-                      <button
-                        onClick={() => handleDelete(property.id)}
-                        className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                      >
-                        Șterge definitiv
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+                <AnimatePresence>
+                  {deleteConfirm === property.id && (
+                    <motion.div
+                      className="bg-red-50 border-t border-red-100 px-6 py-4 flex items-center justify-between"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <p className="text-red-700">Ești sigur că vrei să ștergi această proprietate?</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setDeleteConfirm(null)}
+                          className="px-4 py-2 text-sm text-gray-600 hover:bg-white rounded-lg transition-colors"
+                        >
+                          Anulează
+                        </button>
+                        <button
+                          onClick={() => void handleDelete(property.id)}
+                          className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                          Șterge definitiv
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

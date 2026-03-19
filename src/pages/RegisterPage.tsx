@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../context';
 import logo from '../assets/logo.png';
 
@@ -77,8 +78,6 @@ export function RegisterPage() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
     const result = await register(
       formData.name,
       formData.email,
@@ -86,8 +85,8 @@ export function RegisterPage() {
       formData.phone,
       formData.address
     );
-    if (result.success) {
-      navigate('/dashboard/owner');
+    if (result.success && result.user) {
+      navigate(result.user.isAdmin ? '/dashboard/admin' : '/dashboard/owner');
     } else {
       setErrors({ general: result.error || 'A apărut o eroare.' });
     }
@@ -95,24 +94,9 @@ export function RegisterPage() {
   };
 
   const handleSocialRegister = async (provider: string) => {
-    try {
-      setIsLoading(true);
-      console.info(`Simulated ${provider} register`);
-      const result = await register(
-        'Gazdă Nouă',
-        'gazda.noua@email.com',
-        'password123',
-        '+40 700 000 000',
-        'Str. Exemplu nr. 1, București'
-      );
-      if (result.success) {
-        navigate('/dashboard/owner');
-      } else if (result.error) {
-        setErrors({ general: result.error });
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(true);
+    setErrors({ general: `Înregistrarea prin ${provider} nu este configurată încă.` });
+    setIsLoading(false);
   };
 
   return (
@@ -131,9 +115,18 @@ export function RegisterPage() {
               </p>
             </div>
             <ul className="space-y-4 text-sm text-white/80">
-              <li>• Tool-uri pentru proprietari: ocupare inteligentă și modele de contracte.</li>
-              <li>• Analize comparative de piață și insight-uri din județul tău.</li>
-              <li>• Mentorat și întâlniri trimestriale cu gazdele premium.</li>
+              <li className="flex items-start gap-2">
+                <FiCheckCircle className="mt-0.5 h-4 w-4 text-white/90" />
+                <span>Tool-uri pentru proprietari: ocupare inteligentă și modele de contracte.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <FiCheckCircle className="mt-0.5 h-4 w-4 text-white/90" />
+                <span>Analize comparative de piață și insight-uri din județul tău.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <FiCheckCircle className="mt-0.5 h-4 w-4 text-white/90" />
+                <span>Mentorat și întâlniri trimestriale cu gazdele premium.</span>
+              </li>
             </ul>
           </div>
         </div>

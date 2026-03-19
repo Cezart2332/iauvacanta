@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
+import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
 import { useAuth } from '../context';
 import { BrandButton, buttonClasses } from './ui/Button';
 import logo from '../assets/logo.png';
@@ -33,14 +33,14 @@ export function Navbar() {
   }, [location.pathname, location.hash]);
 
   const handleLogout = () => {
-    logout();
+    void logout();
     setIsProfileOpen(false);
     navigate('/');
   };
 
   const getDashboardLink = () => {
     if (!currentUser) return '/login';
-    return '/dashboard/owner';
+    return currentUser.isAdmin ? '/dashboard/admin' : '/dashboard/owner';
   };
 
   const mobileNavVariants = {

@@ -1,12 +1,16 @@
 import { useState } from 'react';
+import { reservePlace } from '../services/reservation';
+import { useAuth } from '../context';
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   propertyName: string;
+  propertyId: string;
 }
 
-export function BookingModal({ isOpen, onClose, propertyName }: BookingModalProps) {
+export function BookingModal({ isOpen, onClose, propertyName, propertyId }: BookingModalProps) {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,26 +21,54 @@ export function BookingModal({ isOpen, onClose, propertyName }: BookingModalProp
     message: '',
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Booking request:', { propertyName, ...formData });
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        checkIn: '',
-        checkOut: '',
-        guests: 1,
-        message: '',
+
+    if (!isAuthenticated) {
+      setError('Trebuie să fii autentificat pentru a face o rezervare.');
+      return;
+    }
+
+    const placeId = Number(propertyId);
+    if (Number.isNaN(placeId)) {
+      setError('ID proprietate invalid pentru rezervare.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      await reservePlace({
+        placeId,
+        startDate: formData.checkIn,
+        endDate: formData.checkOut
       });
-      onClose();
-    }, 2000);
+
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          checkIn: '',
+          checkOut: '',
+          guests: 1,
+          message: '',
+        });
+        onClose();
+      }, 2000);
+    } catch {
+      setError('Nu am putut trimite rezervarea. Verifică datele și încearcă din nou.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -85,6 +117,11 @@ export function BookingModal({ isOpen, onClose, propertyName }: BookingModalProp
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label htmlFor="name" className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">
@@ -199,8 +236,12 @@ export function BookingModal({ isOpen, onClose, propertyName }: BookingModalProp
                 />
               </div>
 
-              <button type="submit" className="w-full rounded-full bg-aurora px-6 py-3 text-white font-semibold shadow-[0_25px_45px_rgba(18,86,212,0.25)] transition duration-300 hover:shadow-[0_30px_55px_rgba(18,86,212,0.35)]">
-                Trimite cerere de rezervare
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full rounded-full bg-aurora px-6 py-3 text-white font-semibold shadow-[0_25px_45px_rgba(18,86,212,0.25)] transition duration-300 hover:shadow-[0_30px_55px_rgba(18,86,212,0.35)] disabled:opacity-60"
+              >
+                {isSubmitting ? 'Se trimite...' : 'Trimite cerere de rezervare'}
               </button>
 
               <p className="text-center text-xs text-[var(--brand-slate)]">

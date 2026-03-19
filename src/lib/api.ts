@@ -1,9 +1,12 @@
-const DEFAULT_API_BASE_URL = 'http://localhost:4000/api';
+import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios';
+
+const DEFAULT_API_BASE_URL = 'https://localhost:7053/api';
 
 const sanitizeBaseUrl = (value: string): string => {
   if (!value) {
     return DEFAULT_API_BASE_URL;
   }
+
   return value.endsWith('/') ? value.slice(0, -1) : value;
 };
 
@@ -21,64 +24,83 @@ export class ApiError extends Error {
   }
 }
 
-const ensureLeadingSlash = (path: string): string => (path.startsWith('/') ? path : `/${path}`);
-
-export const buildApiUrl = (path: string): string => {
-  if (/^https?:\/\//i.test(path)) {
-    return path;
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json'
   }
-  return `${API_BASE_URL}${ensureLeadingSlash(path)}`;
+});
+
+let refreshInFlight: Promise<void> | null = null;
+
+const refreshSession = async (): Promise<void> => {
+  if (!refreshInFlight) {
+    refreshInFlight = axios
+      .post(`${API_BASE_URL}/auth/refresh-token`, null, { withCredentials: true })
+      .then(() => undefined)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+
+  return refreshInFlight;
 };
 
-const parseResponsePayload = async (response: Response): Promise<unknown> => {
-  const text = await response.text();
-  if (!text) {
-    return null;
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const status = error.response?.status;
+    const originalConfig = error.config as (AxiosRequestConfig & { _retry?: boolean }) | undefined;
+    const requestUrl = originalConfig?.url ?? '';
+    const isAuthRefreshRequest = requestUrl.includes('/auth/refresh-token');
+
+    if (status === 401 && originalConfig && !originalConfig._retry && !isAuthRefreshRequest) {
+      originalConfig._retry = true;
+
+      try {
+        await refreshSession();
+        return apiClient.request(originalConfig);
+      } catch {
+        // Fall through and return the original auth error.
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+const extractApiMessage = (error: AxiosError): string => {
+  const responseData = error.response?.data;
+  if (typeof responseData === 'string' && responseData.trim().length > 0) {
+    return responseData;
   }
 
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
-};
-
-const buildHeaders = (init?: RequestInit): Headers => {
-  const headers = new Headers(init?.headers);
-  const hasBody = init?.body !== undefined && init.body !== null;
-  const isFormData = typeof FormData !== 'undefined' && hasBody && init?.body instanceof FormData;
-
-  if (hasBody && !isFormData && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
+  if (typeof responseData === 'object' && responseData !== null && 'message' in responseData) {
+    return String((responseData as { message?: string }).message ?? 'Request failed');
   }
 
-  if (!headers.has('Accept')) {
-    headers.set('Accept', 'application/json');
-  }
-
-  return headers;
+  return error.message || 'Request failed';
 };
 
 export async function apiFetch<TResponse>(path: string, init?: RequestInit): Promise<TResponse> {
-  const requestInit: RequestInit = {
-    ...init,
-    headers: buildHeaders(init),
+  const method = init?.method ?? 'GET';
+  const requestConfig: AxiosRequestConfig = {
+    url: path,
+    method,
+    data: init?.body,
+    headers: init?.headers as Record<string, string> | undefined
   };
 
-  if (!requestInit.cache) {
-    requestInit.cache = 'no-store';
+  try {
+    const response = await apiClient.request<TResponse>(requestConfig);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new ApiError(extractApiMessage(error), error.response?.status, error.response?.data);
+    }
+
+    throw new ApiError('Unexpected API error');
   }
-
-  const response = await fetch(buildApiUrl(path), requestInit);
-
-  const payload = await parseResponsePayload(response);
-
-  if (!response.ok) {
-    const message = typeof payload === 'object' && payload !== null && 'message' in payload
-      ? String((payload as Record<string, unknown>).message)
-      : `API request failed with status ${response.status}`;
-    throw new ApiError(message, response.status, payload);
-  }
-
-  return payload as TResponse;
 }

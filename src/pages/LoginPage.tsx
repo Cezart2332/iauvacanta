@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FiCheckCircle } from 'react-icons/fi';
 import { useAuth } from '../context';
 import logo from '../assets/logo.png';
 
@@ -42,8 +43,8 @@ export function LoginPage() {
 
     const result = await login(formData.email, formData.password);
 
-    if (result.success) {
-      navigate('/dashboard/owner');
+    if (result.success && result.user) {
+      navigate(result.user.isAdmin ? '/dashboard/admin' : '/dashboard/owner');
     } else {
       setError(result.error || 'A apărut o eroare.');
     }
@@ -53,18 +54,8 @@ export function LoginPage() {
 
   const handleSocialLogin = async (provider: string) => {
     setIsLoading(true);
-    setError('');
-    try {
-      console.info(`Simulated ${provider} login`);
-      const result = await login('ion.georgescu@email.com', 'password123');
-      if (result.success) {
-        navigate('/dashboard/owner');
-      } else {
-        setError(result.error || 'Nu s-a putut realiza autentificarea.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    setError(`Autentificarea prin ${provider} nu este configurată încă.`);
+    setIsLoading(false);
   };
 
   return (
@@ -83,9 +74,18 @@ export function LoginPage() {
               </p>
             </div>
             <ul className="space-y-4 text-sm text-white/80">
-              <li>• Vizibilitate în județele cu trafic ridicat.</li>
-              <li>• Chat direct cu echipa de onboarding și suport dedicat.</li>
-              <li>• Perks pentru gazde: mentori și workshop-uri trimestriale.</li>
+              <li className="flex items-start gap-2">
+                <FiCheckCircle className="mt-0.5 h-4 w-4 text-white/90" />
+                <span>Vizibilitate în județele cu trafic ridicat.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <FiCheckCircle className="mt-0.5 h-4 w-4 text-white/90" />
+                <span>Chat direct cu echipa de onboarding și suport dedicat.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <FiCheckCircle className="mt-0.5 h-4 w-4 text-white/90" />
+                <span>Perks pentru gazde: mentori și workshop-uri trimestriale.</span>
+              </li>
             </ul>
           </div>
         </div>

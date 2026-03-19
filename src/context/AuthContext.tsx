@@ -1,198 +1,240 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
-import { users as initialUsers, validateLogin, type User } from '../mock/users';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ApiError } from '../lib/api';
-import { loginWithLegacyCredentials, registerLegacyAccount, type LegacyUser } from '../services/auth';
+import {
+  login as loginRequest,
+  logout as logoutRequest,
+  refreshToken as refreshTokenRequest,
+  register as registerRequest,
+  type BackendUser
+} from '../services/auth';
+
+export type AppUserRole = 'owner' | 'admin';
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  role: AppUserRole;
+  isAdmin: boolean;
+  avatarUrl: string;
+  createdAt: string;
+  favorites: string[];
+}
+
+interface AuthResult {
+  success: boolean;
+  error?: string;
+  user?: AppUser;
+}
 
 interface AuthContextType {
-  currentUser: User | null;
+  currentUser: AppUser | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; source?: 'legacy' | 'demo' }>;
-  logout: () => void;
+  isBootstrapping: boolean;
+  isAdmin: boolean;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  logout: () => Promise<void>;
   register: (
     name: string,
     email: string,
     password: string,
     phone: string,
     address: string
-  ) => Promise<{ success: boolean; error?: string; source?: 'legacy' | 'demo' }>;
-  updateProfile: (updates: Partial<User>) => void;
+  ) => Promise<AuthResult>;
+  updateProfile: (updates: Partial<AppUser>) => void;
   toggleFavorite: (propertyId: string) => void;
   isFavorite: (propertyId: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+const USER_STORAGE_KEY = 'iauvacanta_current_user';
 
-  const parseLegacyRegisterDate = (registerDate: string): string => {
-    const numericValue = Number(registerDate);
-    if (!Number.isNaN(numericValue) && numericValue > 1000000000) {
-      return new Date(numericValue * 1000).toISOString();
-    }
+const buildAvatar = (name: string): string => {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0f172a&color=fff`;
+};
 
-    const parsedDate = Date.parse(registerDate);
-    if (!Number.isNaN(parsedDate)) {
-      return new Date(parsedDate).toISOString();
-    }
+const mapBackendUserToAppUser = (user: BackendUser): AppUser => {
+  const fullName = user.username;
 
-    return new Date().toISOString();
-  };
-
-  const legacyToUser = (legacyUser: LegacyUser): User => ({
-    id: `legacy-${legacyUser.id}`,
-    name: legacyUser.name,
-    email: legacyUser.email,
-    password: '',
-    role: 'owner',
-    avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(legacyUser.name)}&background=0f172a&color=fff`,
-    phone: legacyUser.phone || undefined,
-    address: legacyUser.address || undefined,
-    createdAt: parseLegacyRegisterDate(legacyUser.registerDate),
+  return {
+    id: String(user.id),
+    name: fullName,
+    email: user.email,
+    role: user.isAdmin ? 'admin' : 'owner',
+    isAdmin: user.isAdmin,
+    avatarUrl: user.profile?.profilePictureUrl || buildAvatar(fullName),
+    createdAt: new Date().toISOString(),
     favorites: []
-  });
-
-  const upsertUser = (user: User): void => {
-    setUsers(prev => {
-      const exists = prev.some(u => u.id === user.id);
-      if (exists) {
-        return prev.map(u => (u.id === user.id ? user : u));
-      }
-      return [...prev, user];
-    });
   };
+};
 
-  const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string; source?: 'legacy' | 'demo' }> => {
-    const normalizedEmail = email.trim();
+const parsePersistedUser = (): AppUser | null => {
+  const raw = localStorage.getItem(USER_STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
 
+  try {
+    return JSON.parse(raw) as AppUser;
+  } catch {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    return null;
+  }
+};
+
+const persistUser = (user: AppUser | null): void => {
+  if (!user) {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    return;
+  }
+
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+};
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => parsePersistedUser());
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const bootstrapAuth = async (): Promise<void> => {
+      try {
+        const response = await refreshTokenRequest();
+        const mappedUser = mapBackendUserToAppUser(response.user);
+
+        if (isMounted) {
+          setCurrentUser(mappedUser);
+          persistUser(mappedUser);
+        }
+      } catch {
+        if (isMounted) {
+          setCurrentUser(null);
+          persistUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsBootstrapping(false);
+        }
+      }
+    };
+
+    void bootstrapAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
     try {
-      const response = await loginWithLegacyCredentials(normalizedEmail, password);
-      const legacyUser = legacyToUser(response.data.user);
-      upsertUser(legacyUser);
-      setCurrentUser(legacyUser);
-      return { success: true, source: 'legacy' };
+      const response = await loginRequest({ email: email.trim(), password });
+      const mappedUser = mapBackendUserToAppUser(response.user);
+      setCurrentUser(mappedUser);
+      persistUser(mappedUser);
+      return { success: true, user: mappedUser };
     } catch (error) {
-      const fallbackUser = validateLogin(normalizedEmail, password);
-      if (fallbackUser) {
-        const latestUser = users.find(u => u.id === fallbackUser.id) || fallbackUser;
-        setCurrentUser(latestUser);
-        return { success: true, source: 'demo' };
-      }
-
       if (error instanceof ApiError && error.status === 401) {
-        return { success: false, error: 'Email sau parolă incorectă' };
+        return { success: false, error: 'Email sau parolă incorectă.' };
       }
 
-      console.error('Legacy auth failed', error);
-      return { success: false, error: 'Nu s-a putut realiza autentificarea. Încearcă din nou.' };
+      return { success: false, error: 'Nu s-a putut realiza autentificarea.' };
     }
-  }, [users]);
-
-  const logout = useCallback(() => {
-    setCurrentUser(null);
   }, []);
 
   const register = useCallback(async (
     name: string,
     email: string,
     password: string,
-    phone: string,
-    address: string
-  ): Promise<{ success: boolean; error?: string; source?: 'legacy' | 'demo' }> => {
-    const trimmedName = name.trim();
-    const normalizedEmail = email.trim();
-    const trimmedPhone = phone.trim();
-    const trimmedAddress = address.trim();
-
+    _phone: string,
+    _address: string
+  ): Promise<AuthResult> => {
     try {
-      const response = await registerLegacyAccount({
-        name: trimmedName,
-        email: normalizedEmail,
-        password,
-        phone: trimmedPhone,
-        address: trimmedAddress
+      const response = await registerRequest({
+        username: name.trim(),
+        email: email.trim(),
+        password
       });
 
-      const legacyUser = legacyToUser(response.data.user);
-      upsertUser(legacyUser);
-      setCurrentUser(legacyUser);
-      return { success: true, source: 'legacy' };
+      const mappedUser = mapBackendUserToAppUser(response.user);
+      setCurrentUser(mappedUser);
+      persistUser(mappedUser);
+      return { success: true, user: mappedUser };
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
-        return { success: false, error: 'Acest email este deja înregistrat' };
+        return { success: false, error: 'Acest email sau username este deja înregistrat.' };
       }
 
-      console.error('Legacy registration failed', error);
-
-      if (users.some(u => u.email.toLowerCase() === normalizedEmail.toLowerCase())) {
-        return { success: false, error: 'Acest email este deja înregistrat' };
-      }
-
-      const newUser: User = {
-        id: `owner-${Date.now()}`,
-        name: trimmedName,
-        email: normalizedEmail,
-        password,
-        role: 'owner',
-        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(trimmedName)}&background=3b82f6&color=fff`,
-        phone: trimmedPhone || undefined,
-        address: trimmedAddress || undefined,
-        createdAt: new Date().toISOString(),
-        favorites: []
-      };
-
-      setUsers(prev => [...prev, newUser]);
-      setCurrentUser(newUser);
-      return { success: true, source: 'demo' };
+      return { success: false, error: 'Nu s-a putut crea contul.' };
     }
-  }, [users]);
+  }, []);
 
-  const updateProfile = useCallback((updates: Partial<User>) => {
-    if (!currentUser) return;
+  const logout = useCallback(async (): Promise<void> => {
+    try {
+      await logoutRequest();
+    } catch {
+      // Ignore backend failures and still clear local state.
+    }
 
-    const updatedUser = { ...currentUser, ...updates };
-    setCurrentUser(updatedUser);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
-  }, [currentUser]);
+    setCurrentUser(null);
+    persistUser(null);
+  }, []);
 
-  const toggleFavorite = useCallback((propertyId: string) => {
-    if (!currentUser) return;
+  const updateProfile = useCallback((updates: Partial<AppUser>): void => {
+    setCurrentUser((prev) => {
+      if (!prev) {
+        return prev;
+      }
 
-    const isFav = currentUser.favorites.includes(propertyId);
-    const newFavorites = isFav
-      ? currentUser.favorites.filter(id => id !== propertyId)
-      : [...currentUser.favorites, propertyId];
+      const updated = { ...prev, ...updates };
+      persistUser(updated);
+      return updated;
+    });
+  }, []);
 
-    const updatedUser = { ...currentUser, favorites: newFavorites };
-    setCurrentUser(updatedUser);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? updatedUser : u));
-  }, [currentUser]);
+  const toggleFavorite = useCallback((propertyId: string): void => {
+    setCurrentUser((prev) => {
+      if (!prev) {
+        return prev;
+      }
+
+      const alreadyFavorite = prev.favorites.includes(propertyId);
+      const nextFavorites = alreadyFavorite
+        ? prev.favorites.filter((id) => id !== propertyId)
+        : [...prev.favorites, propertyId];
+
+      const updated = { ...prev, favorites: nextFavorites };
+      persistUser(updated);
+      return updated;
+    });
+  }, []);
 
   const isFavorite = useCallback((propertyId: string): boolean => {
     return currentUser?.favorites.includes(propertyId) ?? false;
   }, [currentUser]);
 
-  return (
-    <AuthContext.Provider value={{
-      currentUser,
-      isAuthenticated: !!currentUser,
-      login,
-      logout,
-      register,
-      updateProfile,
-      toggleFavorite,
-      isFavorite,
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const value = useMemo<AuthContextType>(() => ({
+    currentUser,
+    isAuthenticated: !!currentUser,
+    isBootstrapping,
+    isAdmin: currentUser?.isAdmin ?? false,
+    login,
+    logout,
+    register,
+    updateProfile,
+    toggleFavorite,
+    isFavorite
+  }), [currentUser, isBootstrapping, login, logout, register, updateProfile, toggleFavorite, isFavorite]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+
   return context;
 }

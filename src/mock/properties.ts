@@ -37,6 +37,7 @@ export interface Property {
   email: string;
   website: string;
   ownerId: string;
+  isApproved?: boolean;
 }
 
 export const facilityLabels: Record<Facility, string> = {

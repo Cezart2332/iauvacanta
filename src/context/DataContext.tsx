@@ -1,7 +1,18 @@
-import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
-import { properties as initialProperties, type Property, type PropertyType, type Facility } from '../mock/properties';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { counties, type County } from '../mock/counties';
-import { fetchVisiblePensiuni, type LegacyPensiune } from '../services/pensiuni';
+import {
+  type Facility,
+  type Property,
+  type PropertyType,
+  properties as fallbackProperties
+} from '../mock/properties';
+import {
+  createPlace,
+  deletePlace,
+  fetchPlaces,
+  updatePlace,
+  type BackendPlace
+} from '../services/place';
 
 interface FilterOptions {
   type?: PropertyType | '';
@@ -24,177 +35,183 @@ interface DataContextType {
   getPropertiesByOwner: (ownerId: string) => Property[];
   filterProperties: (judetSlug: string, filters: FilterOptions) => Property[];
   sortProperties: (properties: Property[], sortBy: SortOption) => Property[];
-  addProperty: (property: Omit<Property, 'id'>) => Property;
-  updateProperty: (id: string, updates: Partial<Property>) => void;
-  deleteProperty: (id: string) => void;
+  addProperty: (property: Omit<Property, 'id'>) => Promise<Property>;
+  updateProperty: (id: string, updates: Partial<Property>) => Promise<void>;
+  deleteProperty: (id: string) => Promise<void>;
   getCountyBySlug: (slug: string) => County | undefined;
   searchProperties: (query: string) => Property[];
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=900&auto=format&fit=crop';
-const FALLBACK_DESCRIPTION = 'Această proprietate face parte din arhiva iauvacanța și în curând va avea o prezentare completă.';
+const KNOWN_FACILITIES = new Set<Facility>([
+  'wifi',
+  'parcare',
+  'mic-dejun',
+  'piscină',
+  'restaurant',
+  'spa',
+  'aer-conditionat',
+  'animale',
+  'fitness',
+  'room-service',
+  'bar',
+  'terasă',
+  'grătar',
+  'jacuzzi',
+  'saună'
+]);
 
-const LEGACY_FACILITY_MAP: Record<string, Facility> = {
-  '111': 'saună',
-  '112': 'fitness',
-  '113': 'spa',
-  '115': 'bar',
-  '117': 'restaurant',
-  '118': 'aer-conditionat',
-  '120': 'jacuzzi',
-  '121': 'terasă',
-  '126': 'room-service',
-  '130': 'terasă',
-  '131': 'grătar',
+const normalize = (value: string): string => {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
 };
 
-const buildReviewCount = (rating: number | null): number => {
-  if (!rating || rating <= 0) {
-    return 0;
-  }
-  return Math.max(8, Math.round(rating * 18));
+const toSlug = (value: string): string => {
+  return normalize(value).replace(/\s+/g, '-');
 };
 
-const mapLegacyFacilities = (facilityIds: string[]): Facility[] => {
-  if (!Array.isArray(facilityIds) || facilityIds.length === 0) {
-    return [];
+const inferCountySlug = (city: string): string => {
+  const citySlug = toSlug(city);
+  const direct = counties.find((county) => county.slug === citySlug);
+  if (direct) {
+    return direct.slug;
   }
 
-  const deduped = new Set<Facility>();
-  facilityIds.forEach((id) => {
-    const mapped = LEGACY_FACILITY_MAP[id];
-    if (mapped) {
-      deduped.add(mapped);
-    }
-  });
+  const partial = counties.find((county) => citySlug.includes(county.slug) || county.slug.includes(citySlug));
+  if (partial) {
+    return partial.slug;
+  }
 
-  return Array.from(deduped.values());
+  return 'bucuresti';
+};
+
+const facilityFromLabel = (value: string): Facility => {
+  const normalized = normalize(value).replace(/\s+/g, '-');
+
+  if (KNOWN_FACILITIES.has(normalized as Facility)) {
+    return normalized as Facility;
+  }
+
+  if (normalized === 'wi-fi') {
+    return 'wifi';
+  }
+
+  if (normalized === 'aer-conditionat') {
+    return 'aer-conditionat';
+  }
+
+  if (normalized === 'roomservice') {
+    return 'room-service';
+  }
+
+  return 'wifi';
+};
+
+const toProperty = (place: BackendPlace): Property => {
+  const countySlug = inferCountySlug(place.city);
+  const stars = Math.min(Math.max(place.stars || 0, 0), 5);
+
+  return {
+    id: String(place.id),
+    name: place.title,
+    type: 'pensiune',
+    judetSlug: countySlug,
+    city: place.city,
+    address: place.city,
+    priceMin: 0,
+    priceMax: 0,
+    rating: stars,
+    reviewCount: 0,
+    facilities: place.facilities.map(facilityFromLabel),
+    mainImageUrl: place.photoUrl,
+    images: [place.photoUrl],
+    description: place.description,
+    tagline: `${stars} stele`,
+    phone: '',
+    email: '',
+    website: '',
+    ownerId: String(place.ownerId),
+    isApproved: place.isApproved
+  };
 };
 
 const formatErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message;
   }
-  if (typeof error === 'string') {
-    return error;
-  }
-  return 'Nu am putut încărca proprietățile. Încercați din nou.';
-};
 
-const mapLegacyPensiuneToProperty = (legacy: LegacyPensiune): Property => {
-  const countySlug = legacy.location.countySlug ?? 'necunoscut';
-  const city = legacy.location.localityName ?? legacy.location.countyName ?? 'România';
-  const priceMin = legacy.price.min ?? legacy.price.max ?? 0;
-  const priceMax = legacy.price.max ?? legacy.price.min ?? priceMin;
-  const images = legacy.photos.length > 0 ? legacy.photos : [FALLBACK_IMAGE];
-
-  return {
-    id: `legacy-${legacy.id}`,
-    name: legacy.name,
-    type: 'pensiune',
-    judetSlug: countySlug,
-    city,
-    address: legacy.address ?? city,
-    priceMin,
-    priceMax,
-    rating: legacy.rating ?? 0,
-    reviewCount: buildReviewCount(legacy.rating),
-    facilities: mapLegacyFacilities(legacy.facilityIds),
-    mainImageUrl: images[0] ?? FALLBACK_IMAGE,
-    images,
-    description: legacy.description ?? FALLBACK_DESCRIPTION,
-    tagline: legacy.type.label ?? city,
-    phone: legacy.phone ?? '',
-    email: legacy.email ?? '',
-    website: '',
-    ownerId: legacy.ownerName ?? `legacy-owner-${legacy.id}`,
-  };
+  return 'Nu am putut încărca proprietățile.';
 };
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [propertiesState, setProperties] = useState<Property[]>(initialProperties);
+  const [propertiesState, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const isMountedRef = useRef(true);
 
   const hydrateFromApi = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
+
     try {
-      const response = await fetchVisiblePensiuni({ limit: 150 });
-      if (!isMountedRef.current) {
-        return;
-      }
-
-      if (!response || !Array.isArray(response.data)) {
-        throw new Error('Datele pensiunilor nu au putut fi interpretate.');
-      }
-
-      const normalized = response.data.map(mapLegacyPensiuneToProperty);
-      setProperties(normalized);
+      const places = await fetchPlaces();
+      setProperties(places.map(toProperty));
     } catch (err) {
-      if (!isMountedRef.current) {
-        return;
-      }
-      console.error('Failed to load pensiuni', err);
+      console.error('Failed to load places', err);
       setError(formatErrorMessage(err));
+      setProperties(fallbackProperties);
     } finally {
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    isMountedRef.current = true;
-    hydrateFromApi();
-
-    return () => {
-      isMountedRef.current = false;
-    };
+    void hydrateFromApi();
   }, [hydrateFromApi]);
 
-  const refreshProperties = useCallback(async () => {
+  const refreshProperties = useCallback(async (): Promise<void> => {
     await hydrateFromApi();
   }, [hydrateFromApi]);
 
   const getPropertyById = useCallback((id: string): Property | undefined => {
-    return propertiesState.find(p => p.id === id);
+    return propertiesState.find((property) => property.id === id);
   }, [propertiesState]);
 
   const getPropertiesByCounty = useCallback((judetSlug: string): Property[] => {
-    return propertiesState.filter(p => p.judetSlug === judetSlug);
+    return propertiesState.filter((property) => property.judetSlug === judetSlug && property.isApproved !== false);
   }, [propertiesState]);
 
   const getPropertiesByOwner = useCallback((ownerId: string): Property[] => {
-    return propertiesState.filter(p => p.ownerId === ownerId);
+    return propertiesState.filter((property) => property.ownerId === ownerId);
   }, [propertiesState]);
 
   const filterProperties = useCallback((judetSlug: string, filters: FilterOptions): Property[] => {
-    let filtered = propertiesState.filter(p => p.judetSlug === judetSlug);
+    let filtered = propertiesState.filter((property) => property.judetSlug === judetSlug && property.isApproved !== false);
 
     if (filters.type) {
-      filtered = filtered.filter(p => p.type === filters.type);
+      filtered = filtered.filter((property) => property.type === filters.type);
     }
 
     if (filters.priceMin !== undefined) {
-      filtered = filtered.filter(p => p.priceMax >= filters.priceMin!);
+      const priceMin = filters.priceMin;
+      filtered = filtered.filter((property) => property.priceMax >= priceMin);
     }
 
     if (filters.priceMax !== undefined) {
-      filtered = filtered.filter(p => p.priceMin <= filters.priceMax!);
+      const priceMax = filters.priceMax;
+      filtered = filtered.filter((property) => property.priceMin <= priceMax);
     }
 
     if (filters.rating !== undefined) {
-      filtered = filtered.filter(p => p.rating >= filters.rating!);
+      const rating = filters.rating;
+      filtered = filtered.filter((property) => property.rating >= rating);
     }
 
     if (filters.facilities && filters.facilities.length > 0) {
-      filtered = filtered.filter(p => 
-        filters.facilities!.every(f => p.facilities.includes(f))
-      );
+      filtered = filtered.filter((property) => filters.facilities?.every((facility) => property.facilities.includes(facility)));
     }
 
     return filtered;
@@ -202,7 +219,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const sortProperties = useCallback((properties: Property[], sortBy: SortOption): Property[] => {
     const sorted = [...properties];
-    
+
     switch (sortBy) {
       case 'price-asc':
         return sorted.sort((a, b) => a.priceMin - b.priceMin);
@@ -217,65 +234,99 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const addProperty = useCallback((propertyData: Omit<Property, 'id'>): Property => {
-    const newProperty: Property = {
-      ...propertyData,
-      id: `prop-${Date.now()}`,
-    };
-    setProperties(prev => [...prev, newProperty]);
-    return newProperty;
+  const addProperty = useCallback(async (propertyData: Omit<Property, 'id'>): Promise<Property> => {
+    const created = await createPlace({
+      title: propertyData.name,
+      description: propertyData.description,
+      photoUrl: propertyData.mainImageUrl,
+      stars: Math.round(propertyData.rating || 0),
+      city: propertyData.city,
+      facilities: propertyData.facilities
+    });
+
+    const mapped = toProperty(created);
+    setProperties((prev) => [...prev, mapped]);
+    return mapped;
   }, []);
 
-  const updateProperty = useCallback((id: string, updates: Partial<Property>) => {
-    setProperties(prev => prev.map(p => 
-      p.id === id ? { ...p, ...updates } : p
-    ));
-  }, []);
+  const updateProperty = useCallback(async (id: string, updates: Partial<Property>): Promise<void> => {
+    const current = propertiesState.find((property) => property.id === id);
+    if (!current) {
+      return;
+    }
 
-  const deleteProperty = useCallback((id: string) => {
-    setProperties(prev => prev.filter(p => p.id !== id));
+    const next = { ...current, ...updates };
+    const updated = await updatePlace(Number(id), {
+      title: next.name,
+      description: next.description,
+      photoUrl: next.mainImageUrl,
+      stars: Math.round(next.rating || 0),
+      city: next.city,
+      facilities: next.facilities
+    });
+
+    setProperties((prev) => prev.map((property) => (property.id === id ? toProperty(updated) : property)));
+  }, [propertiesState]);
+
+  const deleteProperty = useCallback(async (id: string): Promise<void> => {
+    await deletePlace(Number(id));
+    setProperties((prev) => prev.filter((property) => property.id !== id));
   }, []);
 
   const getCountyBySlug = useCallback((slug: string): County | undefined => {
-    return counties.find(c => c.slug === slug);
+    return counties.find((county) => county.slug === slug);
   }, []);
 
   const searchProperties = useCallback((query: string): Property[] => {
-    const lowerQuery = query.toLowerCase();
-    return propertiesState.filter(p => 
-      p.name.toLowerCase().includes(lowerQuery) ||
-      p.city.toLowerCase().includes(lowerQuery) ||
-      p.description.toLowerCase().includes(lowerQuery)
+    const normalizedQuery = query.toLowerCase();
+    return propertiesState.filter((property) =>
+      property.name.toLowerCase().includes(normalizedQuery)
+      || property.city.toLowerCase().includes(normalizedQuery)
+      || property.description.toLowerCase().includes(normalizedQuery)
     );
   }, [propertiesState]);
 
-  return (
-    <DataContext.Provider value={{
-      properties: propertiesState,
-      counties,
-      isLoading,
-      error,
-      refreshProperties,
-      getPropertyById,
-      getPropertiesByCounty,
-      getPropertiesByOwner,
-      filterProperties,
-      sortProperties,
-      addProperty,
-      updateProperty,
-      deleteProperty,
-      getCountyBySlug,
-      searchProperties,
-    }}>
-      {children}
-    </DataContext.Provider>
-  );
+  const value = useMemo<DataContextType>(() => ({
+    properties: propertiesState,
+    counties,
+    isLoading,
+    error,
+    refreshProperties,
+    getPropertyById,
+    getPropertiesByCounty,
+    getPropertiesByOwner,
+    filterProperties,
+    sortProperties,
+    addProperty,
+    updateProperty,
+    deleteProperty,
+    getCountyBySlug,
+    searchProperties
+  }), [
+    propertiesState,
+    isLoading,
+    error,
+    refreshProperties,
+    getPropertyById,
+    getPropertiesByCounty,
+    getPropertiesByOwner,
+    filterProperties,
+    sortProperties,
+    addProperty,
+    updateProperty,
+    deleteProperty,
+    getCountyBySlug,
+    searchProperties
+  ]);
+
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }
 
 export function useData() {
   const context = useContext(DataContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useData must be used within a DataProvider');
   }
+
   return context;
 }

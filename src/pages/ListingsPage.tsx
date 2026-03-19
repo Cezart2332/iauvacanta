@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { FiCheckCircle } from 'react-icons/fi';
 import { PropertyCard, FilterBar, type FilterState, type SortOption } from '../components';
 import { useData } from '../context';
 
@@ -168,13 +169,22 @@ export function ListingsPage() {
               </dl>
             </div>
 
-            <div className="surface-glass glass-ring p-6">
+            <div className="surface-glass glass-ring halo p-6">
               <p className="text-xs uppercase tracking-[0.4em] text-[var(--brand-slate)]/70">Minighid local</p>
               <h2 className="mt-3 text-2xl text-[var(--brand-ink)]">Top experiențe</h2>
               <ul className="mt-4 space-y-3 text-sm text-[var(--brand-slate)]">
-                <li>• Recomandări culinare și trasee create de gazdele din zonă.</li>
-                <li>• Harta cu cafenele, galerii și zone de hiking.</li>
-                <li>• Concierge digital: mesaje directe cu proprietarii.</li>
+                <li className="flex items-start gap-2">
+                  <FiCheckCircle className="mt-0.5 h-4 w-4 text-[var(--brand-primary)]" />
+                  <span>Recomandări culinare și trasee create de gazdele din zonă.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <FiCheckCircle className="mt-0.5 h-4 w-4 text-[var(--brand-primary)]" />
+                  <span>Harta cu cafenele, galerii și zone de hiking.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <FiCheckCircle className="mt-0.5 h-4 w-4 text-[var(--brand-primary)]" />
+                  <span>Concierge digital: mesaje directe cu proprietarii.</span>
+                </li>
               </ul>
               <Link to="/register" className="btn-outline-glow mt-6 inline-flex text-xs uppercase tracking-[0.3em]">
                 Primește itinerarul

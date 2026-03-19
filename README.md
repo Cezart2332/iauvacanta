@@ -1,70 +1,52 @@
-# React + TypeScript + Vite
+# IauVacanta Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite single-page app connected to the ASP.NET Core backend from backend/IauVacanta.Backend.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js 20+
+- npm 10+
+- ASP.NET Core backend running from backend/IauVacanta.Backend
+- PostgreSQL configured for the backend
 
-## React Compiler
+## Environment
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+Configure the backend API base URL in .env:
 
-## Expanding the ESLint configuration
+```env
+VITE_API_BASE_URL=https://localhost:7053/api
+```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+If your backend runs on another URL/port, update this value.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    # IauVacanță – Frontend
+## Install and run
 
-    React + TypeScript + Vite single-page app that now talks to the legacy Express/MySQL backend. Use this doc as a quick start for local development.
+```bash
+npm install
+npm run dev
+```
 
-    ## Prerequisites
+## Build
 
-    - Node.js 20+
-    - npm 10+
-    - Running MySQL instance loaded with `backend/iauvacan_iauvacanta.sql`
-    - Backend server from `backend/` in this repo (Express + mysql2)
+```bash
+npm run build
+npm run preview
+```
 
-    ## Environment variables
+## Connected backend features
 
-    Copy `.env.example` to `.env` and adjust if your backend runs on a different host/port:
+- Authentication with POST /api/auth/register and POST /api/auth/login
+- JWT access token stored in local storage
+- Refresh token handled via secure HTTP-only cookie
+- Place listing loaded from GET /api/place
+- Place creation from owner dashboard via POST /api/place
+- Reservation requests from property details via POST /api/reservation
+- Admin moderation panel for pending places via:
+  - GET /api/place/pending
+  - PATCH /api/place/{id}/approval
 
-    ```
-    VITE_API_BASE_URL=http://localhost:4000/api
-    ```
+## Admin visibility behavior
 
-    The frontend uses this value for all API calls (auth, taxonomy, etc.). When deploying, point it to the public backend URL.
-
-    ## Install & run
-
-    ```bash
-    npm install
-    npm run dev
-    ```
-
-    The dev server expects the backend to be available at `VITE_API_BASE_URL`. Start the backend separately (`cd backend && npm install && npm run dev`).
-
-    ## Production build
-
-    ```bash
-    npm run build
-    npm run preview
-    ```
-
-    ## Legacy authentication flow
-
-    - The login form now calls `POST /api/auth/login` on the backend.
-    - Passwords are hashed with unsalted SHA-512 to match the historical `users` table inside `iauvacan_iauvacanta.sql`.
-    - If the backend is unreachable you can still use the built-in demo accounts listed on the login screen.
-
-    ## Troubleshooting
-
-    - **401 errors** – ensure the email/password pair exists in the imported `users` table.
-    - **Network errors** – verify `VITE_API_BASE_URL` matches the backend origin and that CORS is enabled (it is by default in `backend/src/app.ts`).
-    - **Database issues** – re-import the SQL dump and confirm the backend `.env` points to the right database.
-    },
+- Admin panel is available at /dashboard/admin.
+- The route is visible/accessible only for authenticated users with isAdmin=true.
+- Non-admin users are redirected away from admin route.

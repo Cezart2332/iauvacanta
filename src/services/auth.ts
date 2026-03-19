@@ -1,55 +1,48 @@
-import { apiFetch } from '../lib/api';
+import { apiClient } from '../lib/api';
 
-export type LegacyUser = {
+export interface BackendProfile {
+  description: string;
+  profilePictureUrl: string;
+}
+
+export interface BackendUser {
   id: number;
-  name: string;
-  address: string;
-  phone: string;
+  username: string;
   email: string;
-  registerDate: string;
-  visible: boolean;
-  displayOrder: number;
-  updatedAt: string;
-};
+  isAdmin: boolean;
+  profile: BackendProfile | null;
+}
 
-type LegacyAuthUserEnvelope = {
-  data: {
-    user: LegacyUser;
-  };
-};
+export interface AuthResponse {
+  user: BackendUser;
+}
 
-export type LegacyLoginResponse = LegacyAuthUserEnvelope & {
-  meta: {
-    authenticatedAt: string;
-    strategy: string;
-  };
-};
-
-export type LegacyRegisterResponse = LegacyAuthUserEnvelope & {
-  meta: {
-    registeredAt: string;
-    strategy: string;
-  };
-};
-
-export type LegacyRegisterPayload = {
-  name: string;
+export interface LoginPayload {
   email: string;
   password: string;
-  phone: string;
-  address: string;
+}
+
+export interface RegisterPayload {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export const login = async (payload: LoginPayload): Promise<AuthResponse> => {
+  const response = await apiClient.post<AuthResponse>('/auth/login', payload);
+  return response.data;
 };
 
-export const loginWithLegacyCredentials = async (email: string, password: string): Promise<LegacyLoginResponse> => {
-  return apiFetch<LegacyLoginResponse>('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password })
-  });
+export const register = async (payload: RegisterPayload): Promise<AuthResponse> => {
+  const response = await apiClient.post<AuthResponse>('/auth/register', payload);
+  return response.data;
 };
 
-export const registerLegacyAccount = async (payload: LegacyRegisterPayload): Promise<LegacyRegisterResponse> => {
-  return apiFetch<LegacyRegisterResponse>('/auth/register', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  });
+export const refreshToken = async (): Promise<AuthResponse> => {
+  const response = await apiClient.post<AuthResponse>('/auth/refresh-token');
+  return response.data;
+};
+
+export const logout = async (): Promise<void> => {
+  await apiClient.post('/auth/logout');
 };

@@ -4,3 +4,4 @@ export { PropertyDetailsPage } from './PropertyDetailsPage';
 export { LoginPage } from './LoginPage';
 export { RegisterPage } from './RegisterPage';
 export { OwnerDashboard } from './OwnerDashboard';
+export { AdminPanelPage } from './AdminPanelPage';
