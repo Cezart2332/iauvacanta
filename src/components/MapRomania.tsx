@@ -178,8 +178,8 @@ export function MapRomania({
 }: MapRomaniaProps) {
   const navigate = useNavigate();
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const animationFrameRef = useRef<number>();
-  const redirectTimeoutRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
+  const redirectTimeoutRef = useRef<number | undefined>(undefined);
   const currentViewRef = useRef<MapViewState>(DEFAULT_VIEW);
   const [mapTransform, setMapTransform] = useState<MapViewState>(DEFAULT_VIEW);
   const [hoveredCounty, setHoveredCounty] = useState<string | null>(null);
