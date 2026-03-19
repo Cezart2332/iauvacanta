@@ -36,10 +36,10 @@ export function PropertyDetailsPage() {
 
   if (!property) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center">
+      <div className="min-h-screen pt-24 flex items-center justify-center bg-[var(--brand-sand)]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Proprietatea nu a fost găsită</h1>
-          <p className="text-gray-600 mb-6">Ne pare rău, nu am găsit proprietatea căutată.</p>
+          <h1 className="text-2xl font-bold text-[var(--brand-ink)] mb-4">Proprietatea nu a fost găsită</h1>
+          <p className="text-[var(--brand-slate)] mb-6">Ne pare rău, nu am găsit proprietatea căutată.</p>
           <Link to="/" className="btn-primary">
             Înapoi la pagina principală
           </Link>
@@ -54,12 +54,12 @@ export function PropertyDetailsPage() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.92)_0%,_rgba(235,244,255,0.82)_35%,_rgba(223,234,250,0.72)_100%)] pt-20">
       {/* Breadcrumb */}
-      <div className="border-b border-white/70 bg-white/70 backdrop-blur-xl">
+      <div className="border-b border-white/20 bg-[#0d1524]/75 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav>
-            <ol className="flex items-center gap-2 text-sm text-gray-500">
+            <ol className="flex items-center gap-2 text-sm text-[var(--brand-slate)]">
               <li>
-                <Link to="/" className="hover:text-blue-600 transition-colors">Acasă</Link>
+                <Link to="/" className="hover:text-[var(--brand-primary)] transition-colors">Acasă</Link>
               </li>
               <li>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -67,7 +67,7 @@ export function PropertyDetailsPage() {
                 </svg>
               </li>
               <li>
-                <Link to={`/locations/${property.judetSlug}`} className="hover:text-blue-600 transition-colors">
+                <Link to={`/locations/${property.judetSlug}`} className="hover:text-[var(--brand-primary)] transition-colors">
                   {county?.name}
                 </Link>
               </li>
@@ -76,7 +76,7 @@ export function PropertyDetailsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </li>
-              <li className="text-gray-900 font-medium truncate max-w-[200px]">{property.name}</li>
+              <li className="text-[var(--brand-ink)] font-medium truncate max-w-[200px]">{property.name}</li>
             </ol>
           </nav>
         </div>
@@ -102,7 +102,7 @@ export function PropertyDetailsPage() {
                     className={`absolute top-4 right-4 w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg ${
                       isFav 
                         ? 'bg-red-500 text-white' 
-                        : 'bg-white/90 backdrop-blur-sm text-[var(--brand-slate)] hover:text-red-500'
+                        : 'bg-[#0d1524]/80 backdrop-blur-sm text-[var(--brand-slate)] hover:text-red-500'
                     }`}
                   >
                     <svg 
@@ -119,7 +119,7 @@ export function PropertyDetailsPage() {
 
                 {/* Type badge */}
                 <div className="absolute top-4 left-4">
-                  <span className="px-4 py-2 bg-white/90 backdrop-blur-sm text-sm font-medium text-gray-700 rounded-full shadow-sm">
+                  <span className="px-4 py-2 rounded-full border border-white/20 bg-[#0d1524]/70 backdrop-blur-sm text-sm font-medium text-[var(--brand-slate)] shadow-sm">
                     {propertyTypeLabels[property.type]}
                   </span>
                 </div>
@@ -149,47 +149,47 @@ export function PropertyDetailsPage() {
             <div className="surface-glass glass-ring p-6">
               <div className="flex flex-wrap gap-4 items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-2xl md:text-3xl font-bold text-[var(--brand-ink)] mb-2">
                     {property.name}
                   </h1>
-                  <div className="flex items-center gap-2 text-gray-500">
+                  <div className="flex items-center gap-2 text-[var(--brand-slate)]">
                     <FiMapPin className="w-5 h-5" />
                     <span>{property.city}, {county?.name}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 bg-amber-50 px-4 py-2 rounded-xl">
+                <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2">
                   <FiStar className="w-6 h-6 text-amber-400" />
-                  <span className="text-xl font-bold text-gray-900">{property.rating}</span>
-                  <span className="text-gray-500">({property.reviewCount} recenzii)</span>
+                  <span className="text-xl font-bold text-[var(--brand-ink)]">{property.rating}</span>
+                  <span className="text-[var(--brand-slate)]">({property.reviewCount} recenzii)</span>
                 </div>
               </div>
 
               {property.tagline && (
-                <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full mb-4">
+                <span className="inline-block rounded-full bg-[var(--brand-primary)]/10 px-3 py-1 text-sm font-medium text-[var(--brand-primary)] mb-4">
                   {property.tagline}
                 </span>
               )}
 
-              <p className="text-gray-600 leading-relaxed">{property.description}</p>
+              <p className="text-[var(--brand-slate)] leading-relaxed">{property.description}</p>
             </div>
 
             {/* Facilities */}
             <div className="surface-glass glass-ring p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Facilități</h2>
+              <h2 className="text-xl font-bold text-[var(--brand-ink)] mb-4">Facilități</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {property.facilities.map((facility) => (
                   <div
                     key={facility}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
+                    className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/8 p-3"
                   >
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--brand-primary)]/20 text-[var(--brand-primary)]">
                       {facilityIcons[facility] || (
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
                     </div>
-                    <span className="text-gray-700">{facilityLabels[facility]}</span>
+                    <span className="text-[var(--brand-slate)]">{facilityLabels[facility]}</span>
                   </div>
                 ))}
               </div>
@@ -197,9 +197,9 @@ export function PropertyDetailsPage() {
 
             {/* Map placeholder */}
             <div className="surface-glass glass-ring p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Locație</h2>
-              <div className="aspect-video bg-gray-100 rounded-xl flex items-center justify-center">
-                <div className="text-center text-gray-500">
+              <h2 className="text-xl font-bold text-[var(--brand-ink)] mb-4">Locație</h2>
+              <div className="aspect-video rounded-xl border border-white/20 bg-white/8 flex items-center justify-center">
+                <div className="text-center text-[var(--brand-slate)]">
                   <svg className="w-12 h-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -216,16 +216,16 @@ export function PropertyDetailsPage() {
             {/* Price card */}
             <div className="surface-glass glass-ring p-6 sticky top-24">
               <div className="mb-6">
-                <span className="text-sm text-gray-500">Preț per noapte</span>
+                <span className="text-sm text-[var(--brand-slate)]">Preț per noapte</span>
                 {hasPriceRange ? (
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-gray-900">{property.priceMin}</span>
-                    <span className="text-lg text-gray-500">-</span>
-                    <span className="text-3xl font-bold text-gray-900">{property.priceMax}</span>
-                    <span className="text-lg text-gray-500">RON</span>
+                    <span className="text-3xl font-bold text-[var(--brand-ink)]">{property.priceMin}</span>
+                    <span className="text-lg text-[var(--brand-slate)]">-</span>
+                    <span className="text-3xl font-bold text-[var(--brand-ink)]">{property.priceMax}</span>
+                    <span className="text-lg text-[var(--brand-slate)]">RON</span>
                   </div>
                 ) : (
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
+                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--brand-slate)]">
                     Tarif disponibil la cerere
                   </p>
                 )}
@@ -243,31 +243,31 @@ export function PropertyDetailsPage() {
                 </span>
               </button>
 
-              <p className="text-sm text-gray-500 text-center mb-6">
+              <p className="text-sm text-[var(--brand-slate)] text-center mb-6">
                 Nu vei fi taxat încă
               </p>
 
-              <div className="border-t border-gray-100 pt-6 space-y-4">
-                <h3 className="font-semibold text-gray-900">Contact</h3>
+              <div className="border-t border-white/20 pt-6 space-y-4">
+                <h3 className="font-semibold text-[var(--brand-ink)]">Contact</h3>
                 
                 <a
                   href={`tel:${property.phone}`}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/8 p-3 transition-colors hover:bg-white/12"
                 >
                   <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  <span className="text-gray-700">{property.phone}</span>
+                  <span className="text-[var(--brand-slate)]">{property.phone}</span>
                 </a>
 
                 <a
                   href={`mailto:${property.email}`}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/8 p-3 transition-colors hover:bg-white/12"
                 >
                   <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-gray-700 truncate">{property.email}</span>
+                  <span className="text-[var(--brand-slate)] truncate">{property.email}</span>
                 </a>
 
                 {property.website && (
@@ -275,12 +275,12 @@ export function PropertyDetailsPage() {
                     href={`https://${property.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/8 p-3 transition-colors hover:bg-white/12"
                   >
                     <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                     </svg>
-                    <span className="text-gray-700 truncate">{property.website}</span>
+                    <span className="text-[var(--brand-slate)] truncate">{property.website}</span>
                   </a>
                 )}
               </div>

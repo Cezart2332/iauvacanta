@@ -80,7 +80,7 @@ export function FilterBar({ onFilterChange, onSortChange, currentFilters, curren
     currentFilters.facilities.length > 0;
 
   return (
-    <div className="surface-glass glass-ring halo rounded-[32px] border border-white/60 p-5 md:p-6 space-y-5">
+    <div className="surface-glass glass-ring halo rounded-[32px] border border-white/20 p-5 md:p-6 space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">
           {[{ label: 'Toate', value: '' }, ...(Object.keys(propertyTypeLabels) as PropertyType[]).map((type) => ({ label: propertyTypeLabels[type], value: type }))].map((option) => {
@@ -92,7 +92,7 @@ export function FilterBar({ onFilterChange, onSortChange, currentFilters, curren
                 className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
                   active
                     ? 'border-transparent bg-aurora text-white shadow-[0_15px_35px_rgba(18,86,212,0.25)]'
-                    : 'border-white/50 bg-white/70 text-[var(--brand-slate)] hover:bg-white'
+                    : 'border-white/20 bg-white/10 text-[var(--brand-slate)] hover:bg-white/15'
                 }`}
                 aria-pressed={active}
               >
@@ -102,7 +102,7 @@ export function FilterBar({ onFilterChange, onSortChange, currentFilters, curren
           })}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 rounded-full border border-white/50 bg-white/70 px-3 py-2 text-sm font-semibold text-[var(--brand-slate)]">
+        <div className="flex flex-wrap items-center gap-3 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-sm font-semibold text-[var(--brand-slate)]">
           <span className="uppercase tracking-[0.3em] text-[10px] text-[var(--brand-slate)]/70">Sortare</span>
           <select
             value={currentSort}
@@ -118,7 +118,7 @@ export function FilterBar({ onFilterChange, onSortChange, currentFilters, curren
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-white/50 pt-4">
+      <div className="flex items-center justify-between border-t border-white/20 pt-4">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-2 text-sm font-semibold text-[var(--brand-ink)]"
@@ -184,8 +184,8 @@ export function FilterBar({ onFilterChange, onSortChange, currentFilters, curren
                     onClick={() => handleRatingChange(rating)}
                     className={`flex items-center gap-1 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
                       active
-                        ? 'border-transparent bg-amber-100 text-amber-700 shadow-[0_10px_25px_rgba(255,183,77,0.3)]'
-                        : 'border-white/60 bg-white/60 text-[var(--brand-slate)] hover:bg-white'
+                        ? 'border-transparent bg-amber-400/20 text-amber-100 shadow-[0_10px_25px_rgba(255,183,77,0.25)]'
+                        : 'border-white/20 bg-white/10 text-[var(--brand-slate)] hover:bg-white/15'
                     }`}
                     aria-pressed={active}
                   >
@@ -211,7 +211,7 @@ export function FilterBar({ onFilterChange, onSortChange, currentFilters, curren
                     className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
                       active
                         ? 'border-transparent bg-[var(--brand-primary)]/90 text-white shadow-[0_15px_30px_rgba(18,86,212,0.25)]'
-                        : 'border-white/60 bg-white/60 text-[var(--brand-slate)] hover:bg-white'
+                        : 'border-white/20 bg-white/10 text-[var(--brand-slate)] hover:bg-white/15'
                     }`}
                   >
                     {facilityLabels[facility]}

@@ -46,11 +46,11 @@ interface MapRomaniaProps {
 // ============================================================================
 
 const defaultColors = {
-  base: 'rgba(15, 23, 42, 0.08)',
-  hover: 'rgba(18, 86, 212, 0.18)',
+  base: 'rgba(168, 188, 220, 0.14)',
+  hover: 'rgba(126, 162, 223, 0.2)',
   active: 'var(--brand-primary)',
-  stroke: 'rgba(15, 23, 42, 0.2)',
-  strokeHover: 'var(--brand-primary)',
+  stroke: 'rgba(168, 188, 220, 0.4)',
+  strokeHover: '#b5cbed',
 };
 
 interface MapViewState {
@@ -114,9 +114,9 @@ function CountyShape({
       style={{
         transform: isHovered ? 'scale(1.015)' : 'scale(1)',
         filter: isActive 
-          ? 'drop-shadow(0 4px 6px rgba(59, 130, 246, 0.4))' 
+          ? 'drop-shadow(0 4px 6px rgba(126, 162, 223, 0.28))' 
           : isHovered 
-            ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' 
+            ? 'drop-shadow(0 2px 4px rgba(2, 6, 23, 0.35))' 
             : 'none',
       }}
       onMouseEnter={onMouseEnter}
@@ -149,7 +149,7 @@ function Tooltip({ countyName, visible }: TooltipProps) {
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-2 z-20 flex justify-center" role="presentation">
-      <div className="rounded-2xl border border-white/50 bg-white/90 px-4 py-2.5 text-sm font-medium text-[var(--brand-ink)] shadow-[0_20px_40px_rgba(15,23,42,0.18)]">
+      <div className="rounded-2xl border border-white/20 bg-[#0f1828]/92 px-4 py-2.5 text-sm font-medium text-[var(--brand-ink)] shadow-[0_20px_40px_rgba(2,6,23,0.6)]">
         <div className="flex items-center gap-2">
           <svg className="h-4 w-4 text-[var(--brand-primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -363,8 +363,8 @@ export function MapRomania({
   }, [focusCounty, onResetFocus]);
 
   return (
-    <div className={`relative w-full overflow-hidden rounded-[32px] bg-white/75 p-4 sm:p-6 shadow-[0_25px_60px_rgba(15,23,42,0.12)] ${className}`}>
-      <div className="pointer-events-none absolute inset-0 opacity-40">
+    <div className={`relative w-full overflow-hidden rounded-[32px] border border-white/20 bg-[#0d1524]/85 p-4 sm:p-6 shadow-[0_25px_60px_rgba(2,6,23,0.55)] ${className}`}>
+      <div className="pointer-events-none absolute inset-0 opacity-35">
         <div className="pattern-wave h-full w-full" />
       </div>
 
@@ -373,7 +373,7 @@ export function MapRomania({
           <button
             type="button"
             onClick={handleZoomOut}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--brand-slate)]/20 bg-white/90 text-[var(--brand-slate)] shadow-sm transition hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)]"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-[var(--brand-slate)] shadow-sm transition hover:border-[var(--brand-primary)] hover:bg-white/15 hover:text-[var(--brand-primary)]"
             aria-label="Resetează zoom-ul hărții"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -397,7 +397,7 @@ export function MapRomania({
           >
             <defs>
               <filter id="mapShadow" x="-10%" y="-10%" width="120%" height="120%">
-                <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#000" floodOpacity="0.1" />
+                <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#000" floodOpacity="0.28" />
               </filter>
             </defs>
 
@@ -428,7 +428,7 @@ export function MapRomania({
                     fontSize="11"
                     fontWeight="600"
                     fontFamily="system-ui, sans-serif"
-                    fill={hoveredCounty === county.slug || activeCounty === county.slug ? 'var(--brand-primary)' : '#374151'}
+                    fill={hoveredCounty === county.slug || activeCounty === county.slug ? '#c3d9ff' : '#9fb2d1'}
                     className="transition-colors duration-200"
                   >
                     {county.abbr}
@@ -444,28 +444,28 @@ export function MapRomania({
                 width="185"
                 height="36"
                 rx="10"
-                fill="white"
+                fill="#0f1828"
                 fillOpacity="0.95"
                 className="drop-shadow-sm"
               />
               <circle cx="18" cy="18" r="7" fill={colors.base} stroke={colors.stroke} strokeWidth="1" />
-              <text x="32" y="22" fontSize="11" fill="#6B7280" fontFamily="system-ui, sans-serif">
+              <text x="32" y="22" fontSize="11" fill="#a9bad7" fontFamily="system-ui, sans-serif">
                 Click pe un județ pentru detalii
               </text>
             </g>
 
             <g transform="translate(650, 25)">
-              <circle cx="18" cy="18" r="18" fill="white" fillOpacity="0.95" className="drop-shadow-sm" />
-              <text x="18" y="23" fontSize="13" fill="#374151" textAnchor="middle" fontWeight="600">
+              <circle cx="18" cy="18" r="18" fill="#0f1828" fillOpacity="0.95" className="drop-shadow-sm" />
+              <text x="18" y="23" fontSize="13" fill="#c3d9ff" textAnchor="middle" fontWeight="600">
                 N
               </text>
-              <path d="M18 6 L18 12" stroke="#374151" strokeWidth="2" strokeLinecap="round" />
-              <path d="M18 6 L15 10 L18 8 L21 10 Z" fill="#374151" />
+              <path d="M18 6 L18 12" stroke="#c3d9ff" strokeWidth="2" strokeLinecap="round" />
+              <path d="M18 6 L15 10 L18 8 L21 10 Z" fill="#c3d9ff" />
             </g>
           </svg>
         </div>
 
-        <div className="mt-6 rounded-[24px] border border-white/60 bg-white/80 p-4 text-sm text-[var(--brand-slate)] sm:flex sm:items-center sm:justify-between">
+        <div className="mt-6 rounded-[24px] border border-white/20 bg-white/8 p-4 text-sm text-[var(--brand-slate)] sm:flex sm:items-center sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">Județ selectat</p>
             <p className="mt-1 text-lg font-semibold text-[var(--brand-ink)]">

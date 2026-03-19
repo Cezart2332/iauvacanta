@@ -97,7 +97,7 @@ export function Navbar() {
         {showIndicator && (active || hovered) && (
           <motion.span
             layoutId="nav-pill"
-            className="absolute inset-0 rounded-full bg-white shadow-[0_10px_30px_rgba(15,23,42,0.12)]"
+            className="absolute inset-0 rounded-full bg-white/15 shadow-[0_10px_30px_rgba(2,6,23,0.45)]"
             transition={{ type: 'spring', stiffness: 400, damping: 35 }}
           />
         )}
@@ -123,7 +123,7 @@ export function Navbar() {
           <Link to="/" className="flex items-center gap-3 group">
             <div className="relative">
               <span className="absolute -inset-1 rounded-2xl bg-aurora opacity-30 blur-md group-hover:opacity-70 transition-opacity" />
-              <div className="relative w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-[0_10px_25px_rgba(15,23,42,0.1)]">
+              <div className="relative w-12 h-12 rounded-2xl bg-white/90 flex items-center justify-center shadow-[0_10px_25px_rgba(2,6,23,0.45)]">
                 <img
                   src={logo}
                   alt="Logo iau vacanță"
@@ -143,7 +143,7 @@ export function Navbar() {
           </Link>
 
           <div className="hidden md:flex flex-1 items-center justify-center">
-            <div className="relative flex items-center gap-1 rounded-full border border-white/60 bg-white/50 px-2 py-1 text-sm font-semibold text-[var(--brand-slate)] shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+            <div className="relative flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2 py-1 text-sm font-semibold text-[var(--brand-slate)] shadow-[0_12px_30px_rgba(2,6,23,0.45)]">
               <LayoutGroup id="primary-nav">
                 {navLinks.map((link) => renderNavLink(link))}
               </LayoutGroup>
@@ -155,7 +155,7 @@ export function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen((prev) => !prev)}
-                  className="flex items-center gap-3 rounded-full border border-white/60 bg-white/60 px-3 py-1.5 pr-2 text-sm font-semibold text-[var(--brand-ink)] shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition hover:border-white hover:bg-white"
+                  className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 pr-2 text-sm font-semibold text-[var(--brand-ink)] shadow-[0_10px_30px_rgba(2,6,23,0.45)] transition hover:border-white/30 hover:bg-white/15"
                 >
                   <img src={resolvedAvatar} alt={currentUser?.name} className="w-9 h-9 rounded-full object-cover ring-2 ring-white/60" />
                   <span>{firstName}</span>
@@ -186,7 +186,7 @@ export function Navbar() {
                         <Link
                           to={getDashboardLink()}
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center justify-between rounded-2xl border border-white/60 bg-white/60 px-3 py-2 text-[var(--brand-slate)] transition hover:border-white hover:bg-white"
+                          className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-3 py-2 text-[var(--brand-slate)] transition hover:border-white/30 hover:bg-white/15"
                         >
                           Dashboard
                           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -208,7 +208,7 @@ export function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="inline-flex items-center rounded-2xl border border-[var(--brand-primary)]/40 bg-white/90 px-4 py-2 text-sm font-semibold text-[var(--brand-primary)] shadow-[0_10px_25px_rgba(15,23,42,0.08)] transition hover:border-[var(--brand-primary)] hover:bg-white"
+                  className="inline-flex items-center rounded-2xl border border-[var(--brand-primary)]/40 bg-white/10 px-4 py-2 text-sm font-semibold text-[var(--brand-primary)] shadow-[0_10px_25px_rgba(2,6,23,0.45)] transition hover:border-[var(--brand-primary)] hover:bg-white/15"
                 >
                   Autentificare
                 </Link>
@@ -227,7 +227,7 @@ export function Navbar() {
             )}
             <button
               onClick={() => setIsMenuOpen((prev) => !prev)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-white/60 bg-white/60 text-[var(--brand-ink)] shadow-[0_10px_30px_rgba(15,23,42,0.08)]"
+              className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-[var(--brand-ink)] shadow-[0_10px_30px_rgba(2,6,23,0.45)]"
               aria-label="Deschide meniul"
             >
               <span className="sr-only">Toggle menu</span>
@@ -275,7 +275,7 @@ export function Navbar() {
                   <Link
                     to={getDashboardLink()}
                     onClick={() => setIsMenuOpen(false)}
-                    className="block rounded-2xl border border-white/60 bg-white/60 px-4 py-3 font-semibold text-[var(--brand-slate)]"
+                    className="block rounded-2xl border border-white/20 bg-white/10 px-4 py-3 font-semibold text-[var(--brand-slate)]"
                   >
                     Deschide dashboard
                   </Link>
@@ -288,7 +288,7 @@ export function Navbar() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <Link to="/login" className="block rounded-2xl border border-[var(--brand-primary)]/40 bg-white/90 px-4 py-3 font-semibold text-[var(--brand-primary)]">
+                  <Link to="/login" className="block rounded-2xl border border-[var(--brand-primary)]/40 bg-white/10 px-4 py-3 font-semibold text-[var(--brand-primary)]">
                     Autentificare
                   </Link>
                   <Link to="/register" className="block text-center rounded-2xl bg-aurora text-white px-4 py-3 font-semibold shadow-[0_18px_35px_rgba(15,23,42,0.15)]">

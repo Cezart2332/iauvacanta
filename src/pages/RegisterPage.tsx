@@ -101,8 +101,8 @@ export function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[var(--brand-sand)] px-4 py-24">
-      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[40px] bg-white/85 shadow-[0_40px_80px_rgba(15,23,42,0.18)] md:grid-cols-2">
-        <div className="relative hidden bg-gradient-to-br from-[var(--brand-ink)] via-[#0a1935] to-[#020b1a] p-10 text-white md:flex md:flex-col">
+      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[40px] border border-white/20 bg-black/30 shadow-[0_35px_80px_rgba(2,6,23,0.6)] backdrop-blur-2xl md:grid-cols-2">
+        <div className="relative hidden bg-gradient-to-br from-[#0f1828] via-[#14243d] to-[#0a1220] p-10 text-white md:flex md:flex-col">
           <div className="pointer-events-none absolute inset-0 opacity-35">
             <div className="pattern-wave h-full w-full" />
           </div>
@@ -133,7 +133,7 @@ export function RegisterPage() {
 
         <div className="p-8 sm:p-12">
           <Link to="/" className="inline-flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-[0_10px_25px_rgba(15,23,42,0.1)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/90 shadow-[0_10px_25px_rgba(2,6,23,0.45)]">
               <img src={logo} alt="Logo iau vacanță" className="h-8 w-auto object-contain" loading="lazy" decoding="async" />
             </div>
             <div>
@@ -150,7 +150,7 @@ export function RegisterPage() {
           <div className="mt-8 grid gap-3">
             <button
               onClick={() => handleSocialRegister('google')}
-              className="flex items-center justify-center gap-3 rounded-2xl border border-black/10 px-4 py-3 text-sm font-semibold text-[var(--brand-ink)] transition hover:bg-black/5"
+              className="flex items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-[var(--brand-ink)] transition hover:bg-white/15"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -173,10 +173,10 @@ export function RegisterPage() {
 
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <span className="h-px w-full bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+              <span className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white/85 px-4 text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">sau completează formularul</span>
+              <span className="bg-black/25 px-4 text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/90">sau completează formularul</span>
             </div>
           </div>
 
@@ -289,7 +289,7 @@ export function RegisterPage() {
               <input
                 type="checkbox"
                 required
-                className="mt-1 h-4 w-4 rounded border-gray-300 text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="mt-1 h-4 w-4 rounded border-white/30 bg-transparent text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
               />
               Accept termenii, condițiile și politica de confidențialitate.
             </label>

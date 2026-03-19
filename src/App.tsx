@@ -53,10 +53,10 @@ function App() {
       <AuthProvider>
         <DataProvider>
           <div className="relative min-h-screen bg-[var(--brand-sand)] overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none opacity-70">
+            <div className="absolute inset-0 pointer-events-none opacity-100">
               <div className="pattern-wave w-full h-full" />
-              <div className="absolute -top-32 right-[-10%] w-[420px] h-[420px] bg-aurora blur-3xl opacity-20 rounded-full" />
-              <div className="absolute -bottom-48 left-[-5%] w-[420px] h-[420px] bg-dawn blur-3xl opacity-20 rounded-full" />
+              <div className="absolute -top-32 right-[-10%] w-[420px] h-[420px] bg-aurora blur-3xl opacity-12 rounded-full" />
+              <div className="absolute -bottom-48 left-[-5%] w-[420px] h-[420px] bg-dawn blur-3xl opacity-18 rounded-full" />
             </div>
             <div className="relative flex flex-col min-h-screen">
               <Navbar />

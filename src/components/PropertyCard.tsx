@@ -26,7 +26,7 @@ export function PropertyCard({ property, showFavorite = true }: PropertyCardProp
   return (
     <Link
       to={`/property/${property.id}`}
-      className="group block overflow-hidden rounded-[30px] border border-white/60 bg-white/90 shadow-[0_30px_70px_rgba(15,23,42,0.12)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1"
+      className="group block overflow-hidden rounded-[30px] border border-white/20 bg-white/8 shadow-[0_30px_70px_rgba(2,6,23,0.5)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1"
     >
       <div className="relative h-56 overflow-hidden">
         <img
@@ -52,7 +52,7 @@ export function PropertyCard({ property, showFavorite = true }: PropertyCardProp
         {showFavorite && isAuthenticated && (
           <button
             onClick={handleFavoriteClick}
-            className={`absolute top-4 right-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/50 bg-white/80 text-[var(--brand-primary)] backdrop-blur-md transition ${
+            className={`absolute top-4 right-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 text-[var(--brand-primary)] backdrop-blur-md transition ${
               isFav ? 'bg-[var(--brand-primary)] text-white' : 'hover:text-red-500'
             }`}
           >
@@ -71,7 +71,7 @@ export function PropertyCard({ property, showFavorite = true }: PropertyCardProp
               {property.name}
             </h3>
           </div>
-          <div className="rounded-2xl border border-white/50 bg-white/80 px-3 py-2 text-right">
+          <div className="rounded-2xl border border-white/20 bg-white/10 px-3 py-2 text-right">
             <div className="flex items-center justify-end gap-1">
               <FiStar className="h-4 w-4 text-amber-400" />
               <span className="text-sm font-semibold text-[var(--brand-ink)]">{property.rating}</span>
@@ -84,7 +84,7 @@ export function PropertyCard({ property, showFavorite = true }: PropertyCardProp
           {displayFacilities.map((facility) => (
             <span
               key={facility}
-              className="rounded-full border border-[var(--brand-cloud)]/60 bg-white/80 px-3 py-1 text-xs font-medium text-[var(--brand-slate)]"
+              className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-[var(--brand-slate)]"
             >
               {facilityLabels[facility]}
             </span>
@@ -96,7 +96,7 @@ export function PropertyCard({ property, showFavorite = true }: PropertyCardProp
           )}
         </div>
 
-        <div className="flex items-end justify-between border-t border-white/60 pt-4">
+        <div className="flex items-end justify-between border-t border-white/20 pt-4">
           {hasPrice ? (
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/60">de la</p>

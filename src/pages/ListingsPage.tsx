@@ -104,7 +104,7 @@ export function ListingsPage() {
   return (
     <div className="min-h-screen bg-[var(--brand-sand)] relative">
       {isLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <span className="sr-only">Încărcăm proprietățile reale...</span>
           <span
             aria-hidden
@@ -126,7 +126,7 @@ export function ListingsPage() {
         </div>
       )}
       <section className="relative overflow-hidden pt-28 pb-16">
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-[var(--brand-sand)] to-white" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0d1422] via-[var(--brand-sand)] to-[#111c2d]" />
         <div className="absolute inset-0 pattern-wave opacity-40" />
         <div className="absolute right-[-10%] top-10 h-72 w-72 rounded-full bg-aurora opacity-10 blur-3xl" />
 
@@ -154,15 +154,15 @@ export function ListingsPage() {
               </p>
 
               <dl className="mt-8 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-3xl border border-white/50 bg-white/70 p-4">
+                <div className="rounded-3xl border border-white/20 bg-white/8 backdrop-blur-xl p-4 shadow-[0_14px_30px_rgba(2,6,23,0.45)]">
                   <dt className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">Proprietăți</dt>
                   <dd className="mt-2 text-2xl font-semibold text-[var(--brand-ink)]">{allProperties.length}+</dd>
                 </div>
-                <div className="rounded-3xl border border-white/50 bg-white/70 p-4">
+                <div className="rounded-3xl border border-white/20 bg-white/8 backdrop-blur-xl p-4 shadow-[0_14px_30px_rgba(2,6,23,0.45)]">
                   <dt className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">Rating mediu</dt>
                   <dd className="mt-2 text-2xl font-semibold text-[var(--brand-ink)]">{averageRating}</dd>
                 </div>
-                <div className="rounded-3xl border border-white/50 bg-white/70 p-4">
+                <div className="rounded-3xl border border-white/20 bg-white/8 backdrop-blur-xl p-4 shadow-[0_14px_30px_rgba(2,6,23,0.45)]">
                   <dt className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">Regiune</dt>
                   <dd className="mt-2 text-2xl font-semibold text-[var(--brand-ink)]">{county.region}</dd>
                 </div>
@@ -196,14 +196,12 @@ export function ListingsPage() {
 
       <section className="relative z-10 -mt-10 pb-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-[32px] border border-white/60 bg-white/80 p-4 shadow-[0_18px_35px_rgba(15,23,42,0.1)] sm:p-6">
-            <FilterBar
-              currentFilters={filters}
-              currentSort={sortBy}
-              onFilterChange={handleFilterChange}
-              onSortChange={handleSortChange}
-            />
-          </div>
+          <FilterBar
+            currentFilters={filters}
+            currentSort={sortBy}
+            onFilterChange={handleFilterChange}
+            onSortChange={handleSortChange}
+          />
 
           <div className="mt-8 flex flex-col gap-2 text-sm text-[var(--brand-slate)] md:flex-row md:items-center md:justify-between">
             <p>
@@ -224,7 +222,7 @@ export function ListingsPage() {
 
           {filteredProperties.length === 0 ? (
             countyHasListings ? (
-              <div className="mt-10 rounded-[40px] border border-dashed border-white/60 bg-white/70 p-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+              <div className="mt-10 rounded-[40px] border border-dashed border-white/25 bg-white/8 p-10 text-center shadow-[0_18px_35px_rgba(2,6,23,0.5)] backdrop-blur-xl">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
                   <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M12 8v8m4-4H8" />
@@ -242,7 +240,7 @@ export function ListingsPage() {
                 </button>
               </div>
             ) : (
-              <div className="mt-10 rounded-[40px] border border-dashed border-white/60 bg-white/70 p-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+              <div className="mt-10 rounded-[40px] border border-dashed border-white/25 bg-white/8 p-10 text-center shadow-[0_18px_35px_rgba(2,6,23,0.5)] backdrop-blur-xl">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
                   <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M5 12h14M12 5l7 7-7 7" />

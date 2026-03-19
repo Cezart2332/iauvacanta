@@ -2,20 +2,20 @@
 @import "tailwindcss";
 
 :root {
-  --brand-primary: #1256d4;
-  --brand-accent: #ff914d;
-  --brand-accent-soft: #0ec5a3;
-  --brand-sand: #fdf7ef;
-  --brand-ink: #0f172a;
-  --brand-slate: #4b5565;
-  --brand-cloud: #d9dee7;
-  --brand-glow: rgba(18, 86, 212, 0.35);
+  --brand-primary: #7ea2df;
+  --brand-accent: #d39b72;
+  --brand-accent-soft: #6ea89c;
+  --brand-sand: #080c14;
+  --brand-ink: #eaf0ff;
+  --brand-slate: #afbdd6;
+  --brand-cloud: #2a3547;
+  --brand-glow: rgba(126, 162, 223, 0.26);
   --radius-card: 28px;
   --radius-pill: 999px;
-  --shadow-soft: 0 25px 45px rgba(15, 23, 42, 0.08);
-  --shadow-lifted: 0 20px 45px rgba(18, 86, 212, 0.25);
-  --gradient-aurora: linear-gradient(135deg, #1256d4 0%, #ff914d 100%);
-  --gradient-dawn: linear-gradient(120deg, #ff9770 0%, #ffd166 100%);
+  --shadow-soft: 0 24px 50px rgba(2, 6, 23, 0.5);
+  --shadow-lifted: 0 20px 45px rgba(126, 162, 223, 0.25);
+  --gradient-aurora: linear-gradient(135deg, #5276b4 0%, #b98362 100%);
+  --gradient-dawn: linear-gradient(120deg, #1f2940 0%, #334b70 100%);
 }
 
 /* Custom base styles */
@@ -26,8 +26,9 @@
 
   body {
     font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: radial-gradient(circle at top, rgba(18, 86, 212, 0.08), transparent 45%),
-      radial-gradient(circle at 20% 20%, rgba(255, 145, 77, 0.12), transparent 35%),
+    background: radial-gradient(circle at top, rgba(82, 118, 180, 0.2), transparent 45%),
+      radial-gradient(circle at 20% 20%, rgba(185, 131, 98, 0.14), transparent 35%),
+      radial-gradient(circle at 78% 4%, rgba(110, 168, 156, 0.1), transparent 36%),
       var(--brand-sand);
     color: var(--brand-slate);
     @apply antialiased text-base;
@@ -67,43 +68,49 @@
   .btn-outline-glow {
     @apply inline-flex items-center justify-center font-semibold px-6 py-3 transition-all duration-300 ease-out;
     border-radius: var(--radius-pill);
-    border: 1.5px solid rgba(18, 86, 212, 0.35);
-    color: var(--brand-primary);
-    background: white;
-    box-shadow: inset 0 0 0 1px rgba(18, 86, 212, 0.08);
+    border: 1.5px solid rgba(126, 162, 223, 0.4);
+    color: #d6e5ff;
+    background: rgba(10, 16, 28, 0.58);
+    box-shadow: inset 0 0 0 1px rgba(126, 162, 223, 0.16);
   }
 
   .btn-outline-glow:hover {
-    border-color: var(--brand-primary);
-    box-shadow: 0 12px 30px rgba(18, 86, 212, 0.15);
+    border-color: #a7c3ef;
+    box-shadow: 0 12px 30px rgba(126, 162, 223, 0.2);
     transform: translateY(-1px);
   }
 
   .surface-card {
-    background: white;
+    background: rgba(10, 16, 28, 0.85);
     border-radius: var(--radius-card);
+    border: 1px solid rgba(158, 178, 211, 0.2);
     box-shadow: var(--shadow-soft);
   }
 
   .surface-glass {
-    background: rgba(255, 255, 255, 0.7);
+    background: linear-gradient(140deg, rgba(12, 19, 33, 0.82) 0%, rgba(10, 16, 28, 0.72) 100%);
     border-radius: var(--radius-card);
     backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12);
+    border: 1px solid rgba(158, 178, 211, 0.24);
+    box-shadow: 0 20px 55px rgba(2, 6, 23, 0.48);
   }
 
   .input-field {
     @apply w-full px-4 py-3 transition-all duration-300 outline-none;
-    background: white;
+    background: rgba(9, 15, 25, 0.84);
+    color: #e5edff;
     border-radius: 18px;
-    border: 1.5px solid rgba(15, 23, 42, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 1.5px solid rgba(158, 178, 211, 0.26);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .input-field::placeholder {
+    color: rgba(175, 189, 214, 0.55);
   }
 
   .input-field:focus {
-    border-color: var(--brand-primary);
-    box-shadow: 0 0 0 4px rgba(18, 86, 212, 0.12);
+    border-color: #a7c3ef;
+    box-shadow: 0 0 0 4px rgba(126, 162, 223, 0.2);
   }
 }
 
@@ -139,9 +146,9 @@
   }
 
   .pattern-wave {
-    background-image: radial-gradient(circle at 10% 20%, rgba(18, 86, 212, 0.15), transparent 45%),
-      radial-gradient(circle at 80% 0%, rgba(255, 145, 77, 0.25), transparent 40%),
-      radial-gradient(circle at 50% 80%, rgba(14, 197, 163, 0.18), transparent 40%);
+    background-image: radial-gradient(circle at 10% 20%, rgba(82, 118, 180, 0.22), transparent 45%),
+      radial-gradient(circle at 80% 0%, rgba(185, 131, 98, 0.2), transparent 40%),
+      radial-gradient(circle at 50% 80%, rgba(110, 168, 156, 0.16), transparent 40%);
   }
 
   .glass-ring {
@@ -153,7 +160,7 @@
     position: absolute;
     inset: 12px;
     border-radius: inherit;
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(158, 178, 211, 0.28);
     pointer-events: none;
   }
 }

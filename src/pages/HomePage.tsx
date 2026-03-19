@@ -252,7 +252,7 @@ export function HomePage() {
   return (
     <div className="relative">
       {isLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--brand-sand)]/85 backdrop-blur-md">
           <span className="sr-only">Încărcăm colecția din arhiva iauvacanța...</span>
           <span
             aria-hidden
@@ -275,9 +275,9 @@ export function HomePage() {
       )}
       {/* Hero */}
       <section className="relative overflow-hidden pt-28 pb-16 md:pt-32 md:pb-24">
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-sand)] via-white to-[#f5f2ec]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0c1220] via-[var(--brand-sand)] to-[#101a2a]" />
         <div className="absolute inset-0 pattern-wave opacity-50" />
-        <div className="absolute -right-20 top-16 h-72 w-72 rounded-full bg-aurora opacity-20 blur-3xl" />
+        <div className="absolute -right-20 top-16 h-72 w-72 rounded-full bg-aurora opacity-10 blur-3xl" />
 
         <div className="relative mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:px-8 lg:grid-cols-[1.15fr_.85fr]">
           <div className="space-y-8">
@@ -302,7 +302,7 @@ export function HomePage() {
 
             <dl className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               {statHighlights.map((stat) => (
-                <div key={stat.label} className="rounded-3xl border border-white/50 bg-white/70 p-4 text-center">
+                <div key={stat.label} className="surface-glass glass-ring rounded-3xl p-4 text-center">
                   <dt className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">{stat.label}</dt>
                   <dd className="mt-2 text-2xl font-semibold text-[var(--brand-ink)]">{stat.value}</dd>
                 </div>
@@ -320,7 +320,7 @@ export function HomePage() {
                   <div className="relative overflow-hidden rounded-3xl">
                     <img src={heroHighlightImage} alt={heroHighlight?.name} className="h-56 w-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30" />
-                    <span className="absolute left-5 top-5 inline-flex rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-slate)]">
+                    <span className="absolute left-5 top-5 inline-flex rounded-full border border-white/20 bg-black/45 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-slate)]">
                       Highlight
                     </span>
                   </div>
@@ -351,7 +351,7 @@ export function HomePage() {
                 <Link
                   key={property.id}
                   to={`/property/${property.id}`}
-                  className="rounded-3xl border border-white/50 bg-white/80 p-5 shadow-[0_18px_40px_rgba(15,23,42,0.12)] transition hover:-translate-y-1"
+                  className="surface-glass glass-ring rounded-3xl p-5 transition hover:-translate-y-1"
                 >
                   <p className="text-xs uppercase tracking-[0.3em] text-[var(--brand-slate)]/60">Colecție boutique</p>
                   <h4 className="mt-2 text-lg text-[var(--brand-ink)]">{property.name}</h4>
@@ -375,7 +375,7 @@ export function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="bg-[var(--brand-sand)] py-16 md:py-20">
+      <section className="bg-gradient-to-b from-transparent to-[#0b121f] py-16 md:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 text-center">
             <p className="text-xs uppercase tracking-[0.4em] text-[var(--brand-slate)]/70">Manifest</p>
@@ -383,7 +383,7 @@ export function HomePage() {
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <div key={feature.label} className="rounded-[32px] border border-white/60 bg-white/80 p-6 shadow-[0_18px_35px_rgba(15,23,42,0.08)]">
+              <div key={feature.label} className="surface-glass glass-ring rounded-[32px] p-6">
                 <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]">
                   {feature.icon}
                 </div>
@@ -414,7 +414,7 @@ export function HomePage() {
                     </p>
                   )}
                 </div>
-                <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-[var(--brand-slate)]">
+                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-[var(--brand-slate)]">
                   {destinations.length || counties.length} județe
                 </span>
               </div>
@@ -427,7 +427,7 @@ export function HomePage() {
             </div>
 
             <div className="space-y-6">
-              <div className="rounded-[32px] border border-white/50 bg-white/80 p-6 shadow-[0_18px_35px_rgba(15,23,42,0.08)]">
+              <div className="surface-glass glass-ring rounded-[32px] p-6">
                 <p className="text-xs uppercase tracking-[0.4em] text-[var(--brand-slate)]/70">Destinații populare</p>
                 <div className="mt-4 space-y-4">
                   {destinations.slice(0, 5).map((dest) => {
@@ -438,7 +438,7 @@ export function HomePage() {
                         className={`flex items-center gap-4 rounded-2xl border p-4 transition ${
                           isActive
                             ? 'border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/5 shadow-[0_15px_30px_rgba(18,86,212,0.12)]'
-                            : 'border-transparent hover:border-[var(--brand-primary)]/15 hover:bg-white'
+                            : 'border-transparent hover:border-[var(--brand-primary)]/15 hover:bg-white/10'
                         }`}
                       >
                         <button
@@ -467,7 +467,7 @@ export function HomePage() {
                 </div>
               </div>
 
-              <div className="rounded-[32px] border border-white/50 bg-white/80 p-6 shadow-[0_18px_35px_rgba(15,23,42,0.08)]">
+              <div className="surface-glass glass-ring rounded-[32px] p-6">
                 <p className="text-xs uppercase tracking-[0.4em] text-[var(--brand-slate)]/70">Itinerar personalizat</p>
                 <p className="mt-3 text-[var(--brand-slate)]">
                   Spune-ne mood-ul tău și îți trimitem o listă curatoriată cu trei proprietăți, experiențe locale și restaurante de testat.
@@ -485,7 +485,7 @@ export function HomePage() {
       </section>
 
       {/* Featured properties */}
-      <section className="bg-white py-16 md:py-20">
+      <section className="bg-gradient-to-b from-[#0a111d] to-[#0f1828] py-16 md:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
@@ -510,7 +510,7 @@ export function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="relative overflow-hidden rounded-t-[48px] bg-[var(--brand-ink)] py-16 text-white md:py-20">
+      <section className="relative overflow-hidden rounded-t-[48px] bg-gradient-to-br from-[#121e36] via-[#182945] to-[#23375a] py-16 text-white md:py-20">
         <div className="absolute inset-0 opacity-30">
           <div className="pattern-wave h-full w-full" />
         </div>

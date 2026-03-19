@@ -175,7 +175,7 @@ export function OwnerDashboard() {
 
   return (
     <motion.div
-      className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.9)_0%,_rgba(236,245,255,0.85)_35%,_rgba(225,236,252,0.75)_100%)] pt-20"
+      className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(82,118,180,0.2)_0%,_rgba(10,16,28,0.88)_42%,_rgba(8,12,20,0.96)_100%)] pt-20"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -184,10 +184,10 @@ export function OwnerDashboard() {
         {/* Header */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-[var(--brand-ink)]">
               Proprietățile mele
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="mt-1 text-[var(--brand-slate)]">
               Gestionează-ți proprietățile și vezi statisticile
             </p>
           </div>
@@ -214,18 +214,18 @@ export function OwnerDashboard() {
           ].map((stat, index) => (
             <motion.div
               key={index}
-              className="rounded-2xl border border-white/70 bg-white/55 backdrop-blur-xl shadow-[0_18px_45px_rgba(148,163,184,0.28),inset_0_1px_0_rgba(255,255,255,0.85)] p-6"
+              className="rounded-2xl border border-white/20 bg-white/8 backdrop-blur-xl shadow-[0_18px_45px_rgba(2,6,23,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] p-6"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12 + index * 0.06, duration: 0.28 }}
             >
               <div className="flex items-center gap-3">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/60 bg-white/70 text-[var(--brand-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-[var(--brand-ink)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
                   <stat.Icon className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                  <div className="text-sm text-gray-500">{stat.label}</div>
+                  <div className="text-2xl font-bold text-[var(--brand-ink)]">{stat.value}</div>
+                  <div className="text-sm text-[var(--brand-slate)]">{stat.label}</div>
                 </div>
               </div>
             </motion.div>
@@ -249,18 +249,18 @@ export function OwnerDashboard() {
                 exit={{ opacity: 0 }}
               />
               <motion.div
-                className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/70 bg-white/75 backdrop-blur-2xl shadow-[0_35px_80px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.85)]"
+                className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/20 bg-[#0d1524]/94 backdrop-blur-2xl shadow-[0_35px_80px_rgba(2,6,23,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]"
                 initial={{ opacity: 0, y: 20, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.98 }}
                 transition={{ duration: 0.25 }}
               >
-              <div className="sticky top-0 border-b border-white/60 bg-white/70 backdrop-blur-xl px-6 py-4 flex justify-between items-center z-10">
-                <h2 className="text-xl font-bold text-gray-900">
+              <div className="sticky top-0 border-b border-white/20 bg-[#0d1524]/95 backdrop-blur-xl px-6 py-4 flex justify-between items-center z-10">
+                <h2 className="text-xl font-bold text-[var(--brand-ink)]">
                   {editingProperty ? 'Editează proprietatea' : 'Adaugă proprietate nouă'}
                 </h2>
-                <button onClick={handleCancel} className="p-2 hover:bg-gray-100 rounded-full">
-                  <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button onClick={handleCancel} className="p-2 hover:bg-white/10 rounded-full">
+                  <svg className="w-5 h-5 text-[var(--brand-slate)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -383,8 +383,8 @@ export function OwnerDashboard() {
                         onClick={() => handleFacilityToggle(facility)}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                           formData.facilities.includes(facility)
-                            ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-400'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-[var(--brand-primary)]/25 text-[#dce8ff] ring-2 ring-[var(--brand-primary)]/60'
+                            : 'bg-white/10 text-[var(--brand-slate)] hover:bg-white/15'
                         }`}
                       >
                         {facilityLabels[facility]}
@@ -485,10 +485,10 @@ export function OwnerDashboard() {
 
                 {/* Actions */}
                 <div className="flex gap-4 pt-4 border-t border-gray-100">
-                  <button type="button" onClick={handleCancel} className="btn-secondary flex-1">
+                  <button type="button" onClick={handleCancel} className="btn-outline-glow flex-1 justify-center">
                     Anulează
                   </button>
-                  <button type="submit" className="btn-primary flex-1">
+                  <button type="submit" className="btn-aurora flex-1 justify-center">
                     {editingProperty ? 'Salvează modificările' : 'Adaugă proprietate'}
                   </button>
                 </div>
@@ -500,16 +500,16 @@ export function OwnerDashboard() {
 
         {/* Properties list */}
         {myProperties.length === 0 ? (
-          <motion.div variants={itemVariants} className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <motion.div variants={itemVariants} className="rounded-2xl border border-white/20 bg-white/8 shadow-[0_20px_45px_rgba(2,6,23,0.5)] p-12 text-center">
+            <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-[var(--brand-slate)]/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-[var(--brand-ink)] mb-2">
               Nu ai încă proprietăți listate
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-[var(--brand-slate)] mb-6">
               Adaugă prima ta proprietate și începe să primești cereri de rezervare
             </p>
             <button onClick={() => setShowForm(true)} className="btn-primary">
@@ -526,7 +526,7 @@ export function OwnerDashboard() {
             {myProperties.map((property, index) => (
               <motion.div
                 key={property.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden"
+                className="rounded-xl border border-white/20 bg-white/8 shadow-[0_18px_40px_rgba(2,6,23,0.5)] overflow-hidden"
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.06 * index, duration: 0.25 }}
@@ -557,12 +557,12 @@ export function OwnerDashboard() {
                             <span className="text-xs text-gray-400">({property.reviewCount})</span>
                           </div>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                        <h3 className="text-lg font-semibold text-[var(--brand-ink)] mb-1">
                           <Link to={`/property/${property.id}`} className="hover:text-blue-600">
                             {property.name}
                           </Link>
                         </h3>
-                        <p className="text-gray-500 text-sm mb-3">
+                        <p className="text-[var(--brand-slate)] text-sm mb-3">
                           {property.city}, {property.address}
                         </p>
                         <div className="flex flex-wrap gap-1">
@@ -581,10 +581,10 @@ export function OwnerDashboard() {
 
                       <div className="flex flex-col items-end gap-3">
                         <div className="text-right">
-                          <div className="text-lg font-bold text-gray-900">
+                          <div className="text-lg font-bold text-[var(--brand-ink)]">
                             {property.priceMin} - {property.priceMax} RON
                           </div>
-                          <div className="text-sm text-gray-500">per noapte</div>
+                          <div className="text-sm text-[var(--brand-slate)]">per noapte</div>
                         </div>
                         
                         <div className="flex gap-2">

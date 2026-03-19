@@ -82,17 +82,17 @@ export function BookingModal({ isOpen, onClose, propertyName, propertyId }: Book
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[32px] border border-white/40 bg-white/95 shadow-[0_40px_80px_rgba(15,23,42,0.35)]">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[32px] border border-white/20 bg-[#0d1524]/95 shadow-[0_40px_80px_rgba(2,6,23,0.7)]">
         <div className="absolute inset-x-0 top-0 h-1 bg-aurora" />
 
-        <div className="sticky top-0 flex items-start justify-between gap-4 border-b border-white/60 bg-white/95 px-6 py-5">
+        <div className="sticky top-0 flex items-start justify-between gap-4 border-b border-white/20 bg-[#0d1524]/96 px-6 py-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--brand-slate)]/70">Rezervare personalizată</p>
             <h2 className="text-2xl font-semibold text-[var(--brand-ink)]">{propertyName}</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-full border border-white/60 p-2 text-[var(--brand-slate)] hover:bg-white"
+            className="rounded-full border border-white/20 p-2 text-[var(--brand-slate)] hover:bg-white/10"
             aria-label="Închide"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -105,7 +105,7 @@ export function BookingModal({ isOpen, onClose, propertyName, propertyId }: Book
           {isSubmitted ? (
             <div className="flex flex-col items-center gap-4 py-10 text-center">
               <div className="relative">
-                <div className="h-20 w-20 rounded-full bg-emerald-100" />
+                <div className="h-20 w-20 rounded-full bg-emerald-400/20" />
                 <svg className="absolute inset-0 m-auto h-10 w-10 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M5 13l4 4L19 7" />
                 </svg>
@@ -118,7 +118,7 @@ export function BookingModal({ isOpen, onClose, propertyName, propertyId }: Book
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                <div className="rounded-xl border border-red-300/35 bg-red-500/15 px-4 py-3 text-sm text-red-200">
                   {error}
                 </div>
               )}

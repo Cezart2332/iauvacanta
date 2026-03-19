@@ -26,16 +26,16 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-20 bg-[var(--brand-ink)] text-white">
-      <div className="absolute inset-0 opacity-80">
+    <footer className="relative mt-20 bg-gradient-to-br from-[#111d36] via-[#13294a] to-[#1c3a69] text-white">
+      <div className="absolute inset-0 opacity-55">
         <div className="pattern-wave h-full w-full" />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgba(15,23,42,0.75)] to-[var(--brand-ink)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgba(15,23,42,0.55)] to-[rgba(15,23,42,0.8)]" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid gap-12 lg:grid-cols-4">
           <div className="space-y-5">
-            <Link to="/" className="inline-flex items-center gap-3 rounded-[24px] border border-white/20 bg-white/5 px-4 py-3">
+            <Link to="/" className="inline-flex items-center gap-3 rounded-[24px] border border-white/30 bg-white/10 px-4 py-3 backdrop-blur-md">
               <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center">
                 <img src={logo} alt="Logo iau vacanță" className="h-9 w-auto object-contain" loading="lazy" decoding="async" />
               </div>
@@ -52,7 +52,7 @@ export function Footer() {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="group flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-white/5 text-white/70 transition hover:border-white/40 hover:bg-white/10"
+                  className="group flex h-11 w-11 items-center justify-center rounded-2xl border border-white/25 bg-white/10 text-white/80 transition hover:border-white/50 hover:bg-white/18"
                   aria-label={item.label}
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -124,7 +124,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/60 md:flex-row md:items-center md:justify-between">
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/20 pt-6 text-sm text-white/70 md:flex-row md:items-center md:justify-between">
           <p>© {currentYear} iau vacanță. Toate drepturile rezervate.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-white">Politica de confidențialitate</a>
